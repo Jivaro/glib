@@ -234,7 +234,7 @@ g_cond_wait_internal (GCond *cond,
   EnterCriticalSection (&cond->lock);
 
   /* The event must not be signaled. Check this */
-  g_assert (WaitForSingleObject (event, 0) == WAIT_TIMEOUT);
+  g_assert_cmpint (WaitForSingleObject (event, 0), ==, WAIT_TIMEOUT);
 
   g_ptr_array_add (cond->array, event);
   LeaveCriticalSection (&cond->lock);
