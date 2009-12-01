@@ -539,10 +539,12 @@ g_logv (const gchar   *log_domain,
 	  if ((test_level & G_LOG_FLAG_FATAL) && !masquerade_fatal)
             {
 #ifdef G_OS_WIN32
+#ifndef _DEBUG
 	      gchar *locale_msg = g_locale_from_utf8 (fatal_msg_buf, -1, NULL, NULL, NULL);
 	      
 	      MessageBox (NULL, locale_msg, NULL,
 			  MB_ICONERROR|MB_SETFOREGROUND);
+#endif /* _DEBUG */
 	      if (IsDebuggerPresent () && !(test_level & G_LOG_FLAG_RECURSION))
 		G_BREAKPOINT ();
 	      else
