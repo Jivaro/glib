@@ -59,7 +59,7 @@ AC_CONFIG_MACRO_DIR([m4macros])
 # Save this value here, since automake will set cflags later
 cflags_set=${CFLAGS+set}
 
-AM_INIT_AUTOMAKE([1.10 no-define])
+AM_INIT_AUTOMAKE([1.10 no-define -Wno-portability])
 
 # Support silent build rules, requires at least automake-1.11. Disable
 # by either passing --disable-silent-rules to configure or passing V=1
