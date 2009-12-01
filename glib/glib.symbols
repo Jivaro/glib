@@ -1115,6 +1115,7 @@ g_assertion_message_cmpnum
 g_assertion_message_cmpstr
 g_assertion_message_expr
 g_assertion_message_error
+g_assertion_set_handler
 g_strcmp0
 g_test_add_data_func
 g_test_add_func

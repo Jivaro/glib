@@ -89,7 +89,12 @@ static void     gtest_default_log_handler       (const gchar    *log_domain,
                                                  GLogLevelFlags  log_level,
                                                  const gchar    *message,
                                                  gpointer        unused_data);
-
+static void     g_default_assertion_handler     (const char     *domain,
+                                                 const char     *file,
+                                                 int             line,
+                                                 const char     *func,
+                                                 const char     *message,
+                                                 gpointer       user_data) G_GNUC_NORETURN;
 
 /* --- variables --- */
 static int         test_log_fd = -1;
@@ -122,6 +127,8 @@ static GTestConfig mutable_test_config_vars = {
   FALSE,        /* test_quiet */
 };
 const GTestConfig * const g_test_config_vars = &mutable_test_config_vars;
+static GAssertionFunc assertion_handler = g_default_assertion_handler;
+static gpointer       assertion_handler_data = NULL;
 
 /* --- functions --- */
 const char*
@@ -1394,11 +1401,20 @@ gtest_default_log_handler (const gchar    *log_domain,
 }
 
 void
-g_assertion_message (const char     *domain,
-                     const char     *file,
-                     int             line,
-                     const char     *func,
-                     const char     *message)
+g_assertion_set_handler (GAssertionFunc handler,
+                         gpointer user_data)
+{
+  assertion_handler_data = user_data;
+  assertion_handler = handler;
+}
+
+static void
+g_default_assertion_handler (const char     *domain,
+                             const char     *file,
+                             int             line,
+                             const char     *func,
+                             const char     *message,
+                             gpointer       user_data)
 {
   char lstr[32];
   char *s;
@@ -1422,7 +1438,17 @@ g_assertion_message (const char     *domain,
 
   g_test_log (G_TEST_LOG_ERROR, s, NULL, 0, NULL);
   g_free (s);
-  abort();
+  abort ();
+}
+
+void
+g_assertion_message (const char     *domain,
+                     const char     *file,
+                     int             line,
+                     const char     *func,
+                     const char     *message)
+{
+  assertion_handler (domain, file, line, func, message, assertion_handler_data);
 }
 
 void
