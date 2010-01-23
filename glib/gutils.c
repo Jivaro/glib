@@ -51,6 +51,9 @@
 #endif
 #ifdef HAVE_CRT_EXTERNS_H 
 #include <crt_externs.h> /* for _NSGetEnviron */
+#elif defined (HAVE__NSGETENVIRON)
+/* HACK: this one is missing from the iPhone SDK */
+extern char ***_NSGetEnviron(void);
 #endif
 
 /* implement gutils's inline functions
