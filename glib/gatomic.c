@@ -24,7 +24,14 @@
 #include "config.h"
 
 #if defined (G_ATOMIC_ARM)
+#ifdef HAVE_TARGETCONDITIONALS_H
+#include <TargetConditionals.h>
+#endif
+#ifdef TARGET_OS_IPHONE
+#include <libkern/OSAtomic.h>
+#else
 #include <sched.h>
+#endif
 #endif
 
 #include "gatomic.h"
@@ -599,6 +606,41 @@ g_atomic_pointer_compare_and_exchange (volatile gpointer G_GNUC_MAY_ALIAS *atomi
 #    error "Your system has an unsupported pointer size"
 #  endif /* GLIB_SIZEOF_VOID_P */
 # elif defined (G_ATOMIC_ARM)
+
+#ifdef TARGET_OS_IPHONE
+
+gint
+g_atomic_int_exchange_and_add (volatile gint G_GNUC_MAY_ALIAS *atomic, 
+			       gint           val)
+{
+  return OSAtomicAdd32 (val, atomic) - val;
+}
+
+void
+g_atomic_int_add (volatile gint G_GNUC_MAY_ALIAS *atomic,
+		  gint           val)
+{
+  OSAtomicAdd32 (val, atomic);
+}
+
+gboolean
+g_atomic_int_compare_and_exchange (volatile gint G_GNUC_MAY_ALIAS *atomic, 
+				   gint           oldval, 
+				   gint           newval)
+{
+  return OSAtomicCompareAndSwapInt (oldval, newval, atomic);
+}
+
+gboolean
+g_atomic_pointer_compare_and_exchange (volatile gpointer G_GNUC_MAY_ALIAS *atomic, 
+				       gpointer           oldval, 
+				       gpointer           newval)
+{
+  return OSAtomicCompareAndSwapPtr (oldval, newval, atomic);
+}
+
+#else /* !TARGET_OS_IPHONE */
+
 static volatile int atomic_spin = 0;
 
 static int atomic_spin_trylock (void)
@@ -689,6 +731,9 @@ g_atomic_pointer_compare_and_exchange (volatile gpointer G_GNUC_MAY_ALIAS *atomi
 
   return result;
 }
+
+#endif /* !TARGET_OS_IPHONE */
+
 # elif defined (G_ATOMIC_CRIS) || defined (G_ATOMIC_CRISV32)
 #  ifdef G_ATOMIC_CRIS
 #   define CRIS_ATOMIC_INT_CMP_XCHG(atomic, oldval, newval)		\
