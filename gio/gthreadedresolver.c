@@ -522,7 +522,7 @@ do_lookup_service (GThreadedResolverRequest *req,
   guchar answer[1024];
 #elif defined(G_OS_WIN32)
   DNS_STATUS status;
-  DNS_RECORD *results;
+  DNS_RECORD *results = NULL;
 #endif
 
 #if defined(G_OS_UNIX)
