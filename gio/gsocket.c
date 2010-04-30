@@ -137,6 +137,8 @@ enum
   PROP_BLOCKING,
   PROP_LISTEN_BACKLOG,
   PROP_KEEPALIVE,
+  PROP_RECEIVE_BUFFER_SIZE,
+  PROP_SEND_BUFFER_SIZE,
   PROP_LOCAL_ADDRESS,
   PROP_REMOTE_ADDRESS,
   PROP_TIMEOUT
@@ -149,6 +151,8 @@ struct _GSocketPrivate
   GSocketProtocol protocol;
   gint            fd;
   gint            listen_backlog;
+  gint            receive_buffer_size;
+  gint            send_buffer_size;
   guint           timeout;
   GError         *construct_error;
   GSocketAddress *remote_address;
@@ -576,6 +580,14 @@ g_socket_get_property (GObject    *object,
 	g_value_set_boolean (value, socket->priv->keepalive);
 	break;
 
+      case PROP_RECEIVE_BUFFER_SIZE:
+	g_value_set_int (value, socket->priv->receive_buffer_size);
+	break;
+
+      case PROP_SEND_BUFFER_SIZE:
+	g_value_set_int (value, socket->priv->send_buffer_size);
+	break;
+
       case PROP_LOCAL_ADDRESS:
 	address = g_socket_get_local_address (socket, NULL);
 	g_value_take_object (value, address);
@@ -631,6 +643,14 @@ g_socket_set_property (GObject      *object,
 
       case PROP_KEEPALIVE:
 	g_socket_set_keepalive (socket, g_value_get_boolean (value));
+	break;
+
+      case PROP_RECEIVE_BUFFER_SIZE:
+	g_socket_set_receive_buffer_size (socket, g_value_get_int (value));
+	break;
+
+      case PROP_SEND_BUFFER_SIZE:
+	g_socket_set_send_buffer_size (socket, g_value_get_int (value));
 	break;
 
       case PROP_TIMEOUT:
@@ -762,6 +782,26 @@ g_socket_class_init (GSocketClass *klass)
 							 G_PARAM_READWRITE |
                                                          G_PARAM_STATIC_STRINGS));
 
+  g_object_class_install_property (gobject_class, PROP_RECEIVE_BUFFER_SIZE,
+				   g_param_spec_int ("receive-buffer-size",
+						     P_("Receive Buffer Size"),
+						     P_("Receive buffer size reserved by OS"),
+						     -1,
+						     G_MAXINT,
+						     -1,
+						     G_PARAM_READWRITE |
+                                                     G_PARAM_STATIC_STRINGS));
+
+  g_object_class_install_property (gobject_class, PROP_SEND_BUFFER_SIZE,
+				   g_param_spec_int ("send-buffer-size",
+						     P_("Send Buffer Size"),
+						     P_("Send buffer size reserved by OS"),
+						     -1,
+						     G_MAXINT,
+						     -1,
+						     G_PARAM_READWRITE |
+                                                     G_PARAM_STATIC_STRINGS));
+
   g_object_class_install_property (gobject_class, PROP_LOCAL_ADDRESS,
 				   g_param_spec_object ("local-address",
 							P_("Local address"),
@@ -810,6 +850,8 @@ g_socket_init (GSocket *socket)
   socket->priv->fd = -1;
   socket->priv->blocking = TRUE;
   socket->priv->listen_backlog = 10;
+  socket->priv->receive_buffer_size = -1;
+  socket->priv->send_buffer_size = -1;
   socket->priv->construct_error = NULL;
 #ifdef G_OS_WIN32
   socket->priv->event = WSA_INVALID_EVENT;
@@ -1078,6 +1120,104 @@ g_socket_set_listen_backlog (GSocket *socket,
       socket->priv->listen_backlog = backlog;
       g_object_notify (G_OBJECT (socket), "listen-backlog");
     }
+}
+
+/**
+ * g_socket_set_receive_buffer_size:
+ * @socket: a #GSocket.
+ * @size: the buffer size reserved for receives.
+ *
+ * Sets the buffer size reserved by the OS for receives.
+ *
+ * Since: 2.24
+ */
+void
+g_socket_set_receive_buffer_size (GSocket *socket,
+                                  gint     size)
+{
+  g_return_if_fail (G_IS_SOCKET (socket));
+
+  if (socket->priv->receive_buffer_size == size)
+    return;
+
+  if (setsockopt (socket->priv->fd, SOL_SOCKET, SO_RCVBUF,
+      (gpointer) &size, sizeof (size)) < 0)
+  {
+    int errsv = get_socket_errno ();
+    g_warning ("error setting receive buffer size: %s",
+        socket_strerror (errsv));
+    return;
+  }
+
+  socket->priv->receive_buffer_size = size;
+  g_object_notify (G_OBJECT (socket), "receive-buffer-size");
+}
+
+/**
+ * g_socket_get_receive_buffer_size:
+ * @socket: a #GSocket.
+ *
+ * Gets the receive buffer size of the socket.
+ *
+ * Returns: the receive buffer size.
+ *
+ * Since: 2.24
+ */
+gint
+g_socket_get_receive_buffer_size (GSocket *socket)
+{
+  g_return_val_if_fail (G_IS_SOCKET (socket), 0);
+
+  return socket->priv->receive_buffer_size;
+}
+
+/**
+ * g_socket_set_send_buffer_size:
+ * @socket: a #GSocket.
+ * @size: the buffer size reserved for sends.
+ *
+ * Sets the buffer size reserved by the OS for sends.
+ *
+ * Since: 2.24
+ */
+void
+g_socket_set_send_buffer_size (GSocket *socket,
+                               gint     size)
+{
+  g_return_if_fail (G_IS_SOCKET (socket));
+
+  if (socket->priv->send_buffer_size == size)
+    return;
+
+  if (setsockopt (socket->priv->fd, SOL_SOCKET, SO_SNDBUF,
+      (gpointer) &size, sizeof (size)) < 0)
+  {
+    int errsv = get_socket_errno ();
+    g_warning ("error setting send buffer size: %s",
+        socket_strerror (errsv));
+    return;
+  }
+
+  socket->priv->send_buffer_size = size;
+  g_object_notify (G_OBJECT (socket), "send-buffer-size");
+}
+
+/**
+ * g_socket_get_send_buffer_size:
+ * @socket: a #GSocket.
+ *
+ * Gets the send buffer size of the socket.
+ *
+ * Returns: the send buffer size.
+ *
+ * Since: 2.24
+ */
+gint
+g_socket_get_send_buffer_size (GSocket *socket)
+{
+  g_return_val_if_fail (G_IS_SOCKET (socket), 0);
+
+  return socket->priv->send_buffer_size;
 }
 
 /**

@@ -97,6 +97,12 @@ gboolean               g_socket_get_keepalive           (GSocket                
 gint                   g_socket_get_listen_backlog      (GSocket                 *socket);
 void                   g_socket_set_listen_backlog      (GSocket                 *socket,
 							 gint                     backlog);
+void                   g_socket_set_receive_buffer_size (GSocket                 *socket,
+                                                         gint                     size);
+gint                   g_socket_get_receive_buffer_size (GSocket                 *socket);
+void                   g_socket_set_send_buffer_size    (GSocket                 *socket,
+                                                         gint                     size);
+gint                   g_socket_get_send_buffer_size    (GSocket                 *socket);
 guint                  g_socket_get_timeout             (GSocket                 *socket);
 void                   g_socket_set_timeout             (GSocket                 *socket,
 							 guint                    timeout);
