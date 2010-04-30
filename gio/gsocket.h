@@ -111,6 +111,7 @@ gboolean               g_socket_connect                 (GSocket                
 							 GError                 **error);
 gboolean               g_socket_check_connect_result    (GSocket                 *socket,
 							 GError                 **error);
+gulong                 g_socket_peek_bytes_pending      (GSocket                 *socket);
 GIOCondition           g_socket_condition_check         (GSocket                 *socket,
 							 GIOCondition             condition);
 gboolean               g_socket_condition_wait          (GSocket                 *socket,

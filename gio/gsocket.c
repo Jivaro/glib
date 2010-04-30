@@ -41,6 +41,7 @@
 #ifndef G_OS_WIN32
 # include <fcntl.h>
 # include <unistd.h>
+# include <sys/ioctl.h>
 #endif
 
 #ifdef HAVE_SYS_UIO_H
@@ -1729,6 +1730,32 @@ g_socket_check_connect_result (GSocket  *socket,
       return FALSE;
     }
   return TRUE;
+}
+
+/**
+ * g_socket_peek_bytes_pending:
+ * @socket: a #GSocket
+ *
+ * Peek amount of data pending in the OS input buffer.
+ *
+ * Returns: the number of bytes that can be read from the socket
+ *
+ * Since: 2.24
+ */
+gulong
+g_socket_peek_bytes_pending (GSocket *socket)
+{
+  gulong pending = 0;
+
+#ifndef G_OS_WIN32
+  if (ioctl (socket->priv->fd, FIONREAD, &pending) < 0)
+    return 0;
+#else
+  if (ioctlsocket (socket->priv->fd, FIONREAD, &pending) == SOCKET_ERROR)
+    return 0;
+#endif
+
+  return pending;
 }
 
 /**
