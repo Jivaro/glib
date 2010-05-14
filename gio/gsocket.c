@@ -3144,6 +3144,7 @@ g_socket_send_message (GSocket                *socket,
     }
 
     /* control */
+    if (num_messages > 0)
     {
       struct cmsghdr *cmsg;
       gint i;
@@ -3171,6 +3172,11 @@ g_socket_send_message (GSocket                *socket,
 	  cmsg = CMSG_NXTHDR (&msg, cmsg);
 	}
       g_assert (cmsg == NULL);
+    }
+    else
+    {
+      msg.msg_control = NULL;
+      msg.msg_controllen = 0;
     }
 
     while (1)
@@ -3515,6 +3521,7 @@ g_socket_receive_message (GSocket                 *socket,
       }
 
     /* decode control messages */
+    if (msg.msg_controllen > 0)
     {
       GPtrArray *my_messages = NULL;
       struct cmsghdr *cmsg;
