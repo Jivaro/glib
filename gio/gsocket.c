@@ -497,6 +497,19 @@ g_socket_create_socket (GSocketFamily   family,
 		   _("Unable to create socket: %s"), socket_strerror (errsv));
     }
 
+#ifdef G_OS_WIN32
+  if (native_type == SOCK_DGRAM)
+  {
+    DWORD dw_bytes_returned = 0;
+    BOOL b_new_behavior = FALSE;
+    /* disable conn reset error on ICMP port unreacable */
+
+    WSAIoctl(fd, SIO_UDP_CONNRESET,
+        &b_new_behavior, sizeof(b_new_behavior),
+        NULL, 0, &dw_bytes_returned, NULL, NULL);
+  }
+#endif
+
 #ifndef G_OS_WIN32
   {
     int flags;
