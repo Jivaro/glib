@@ -36,3 +36,7 @@ py-compile
 INSTALL
 README
 ChangeLog
+
+*.sln.cache
+x86
+x86_64
