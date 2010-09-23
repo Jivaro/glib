@@ -533,7 +533,7 @@ g_inet_address_to_string (GInetAddress *address)
   gchar buffer[INET6_ADDRSTRLEN];
 #ifdef G_OS_WIN32
   DWORD buflen = sizeof (buffer), addrlen;
-  struct sockaddr_storage sa;
+  struct sockaddr_storage sa = { 0, };
   struct sockaddr_in *sin = (struct sockaddr_in *)&sa;
   struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)&sa;
 #endif
@@ -554,7 +554,6 @@ g_inet_address_to_string (GInetAddress *address)
       addrlen = sizeof (*sin6);
       memcpy (&sin6->sin6_addr, &address->priv->addr.ipv6,
 	      sizeof (sin6->sin6_addr));
-      sin6->sin6_port = 0;
     }
   if (WSAAddressToString ((LPSOCKADDR) &sa, addrlen, NULL, buffer, &buflen) != 0)
     return NULL;
