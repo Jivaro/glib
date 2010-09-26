@@ -354,6 +354,7 @@ mechanism_client_initiate (GDBusAuthMechanism   *mechanism,
 #ifdef __GNUC__
 #warning Dont know how to send credentials on this OS. The EXTERNAL D-Bus authentication mechanism will not work.
 #endif
+  initial_response = NULL;
   m->priv->state = G_DBUS_AUTH_MECHANISM_STATE_REJECTED;
 #endif
   return initial_response;
