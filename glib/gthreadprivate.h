@@ -43,22 +43,29 @@ G_BEGIN_DECLS
    g_thread_functions_for_glib_use.thread_equal (&(thread1), &(thread2)) :\
    g_system_thread_equal_simple((thread1), (thread2)))
 
-/* Is called from gthread/gthread-impl.c */
+/* These two are called from gthread/gthread-impl.c */
 void g_thread_init_glib (void);
+void g_thread_deinit_glib (void);
 
 /* base initializers, may only use g_mutex_new(), g_cond_new() */
 G_GNUC_INTERNAL void _g_mem_thread_init_noprivate_nomessage (void);
+G_GNUC_INTERNAL void _g_mem_thread_deinit_noprivate_nomessage (void);
 /* initializers that may also use g_private_new() */
 G_GNUC_INTERNAL void _g_slice_thread_init_nomessage	    (void);
+G_GNUC_INTERNAL void _g_slice_thread_deinit_nomessage	    (void);
 G_GNUC_INTERNAL void _g_messages_thread_init_nomessage      (void);
+G_GNUC_INTERNAL void _g_messages_thread_deinit_nomessage    (void);
 
 /* full fledged initializers */
 G_GNUC_INTERNAL void _g_convert_thread_init (void);
 G_GNUC_INTERNAL void _g_rand_thread_init (void);
 G_GNUC_INTERNAL void _g_main_thread_init (void);
 G_GNUC_INTERNAL void _g_atomic_thread_init (void);
+G_GNUC_INTERNAL void _g_atomic_thread_deinit (void);
 G_GNUC_INTERNAL void _g_utils_thread_init (void);
 G_GNUC_INTERNAL void _g_futex_thread_init (void);
+G_GNUC_INTERNAL void _g_futex_thread_deinit (void);
+G_GNUC_INTERNAL void _g_thread_pool_deinit (void);
 
 #ifdef G_OS_WIN32
 G_GNUC_INTERNAL void _g_win32_thread_init (void);

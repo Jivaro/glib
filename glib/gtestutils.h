@@ -101,6 +101,7 @@ void    g_test_maximized_result         (double          maximized_quantity,
 void    g_test_init                     (int            *argc,
                                          char         ***argv,
                                          ...);
+void    g_test_deinit                   (void);
 /* query testing framework config */
 #define g_test_quick()                  (g_test_config_vars->test_quick)
 #define g_test_slow()                   (!g_test_config_vars->test_quick)

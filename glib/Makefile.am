@@ -153,6 +153,7 @@ libglib_2_0_la_SOURCES = 	\
 	gmappedfile.c		\
 	gmarkup.c		\
 	gmem.c			\
+	gmemprivate.h		\
 	gmessages.c		\
 	gmirroringtable.h	\
 	gnode.c			\

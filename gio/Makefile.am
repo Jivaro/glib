@@ -298,6 +298,8 @@ endif
 SUBDIRS += tests
 
 libgio_2_0_la_SOURCES =		\
+	gio.c			\
+	gioprivate.h		\
 	gappinfo.c 		\
 	gasynchelper.c 		\
 	gasynchelper.h 		\

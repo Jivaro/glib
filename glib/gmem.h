@@ -250,6 +250,7 @@ struct _GMemVTable {
   gpointer (*try_realloc) (gpointer mem,
 			   gsize    n_bytes);
 };
+void	 g_mem_deinit     (void);
 void	 g_mem_set_vtable (GMemVTable	*vtable);
 gboolean g_mem_is_system_malloc (void);
 

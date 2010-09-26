@@ -33,6 +33,7 @@
 #endif
 #include "gcancellable.h"
 #include "gio-marshal.h"
+#include "gioprivate.h"
 #include "glibintl.h"
 
 
@@ -853,4 +854,14 @@ g_cancellable_source_new (GCancellable *cancellable)
     }
 
   return source;
+}
+
+void
+_g_cancellable_deinit (void)
+{
+  if (cancellable_cond != NULL)
+    {
+      g_cond_free (cancellable_cond);
+      cancellable_cond = NULL;
+    }
 }

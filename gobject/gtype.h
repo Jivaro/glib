@@ -666,6 +666,7 @@ typedef enum	/*< skip >*/
 /* --- prototypes --- */
 void                  g_type_init                    (void);
 void                  g_type_init_with_debug_flags   (GTypeDebugFlags  debug_flags);
+void                  g_type_deinit                  (void);
 G_CONST_RETURN gchar* g_type_name                    (GType            type);
 GQuark                g_type_qname                   (GType            type);
 GType                 g_type_from_name               (const gchar     *name);
@@ -1663,14 +1664,19 @@ G_CONST_RETURN gchar* g_type_name_from_class	(GTypeClass	*g_class);
 
 /* --- internal functions --- */
 G_GNUC_INTERNAL void    g_value_c_init          (void); /* sync with gvalue.c */
+G_GNUC_INTERNAL void    g_value_c_deinit        (void); /* sync with gvalue.c */
 G_GNUC_INTERNAL void    g_value_types_init      (void); /* sync with gvaluetypes.c */
 G_GNUC_INTERNAL void    g_enum_types_init       (void); /* sync with genums.c */
 G_GNUC_INTERNAL void    g_param_type_init       (void); /* sync with gparam.c */
+G_GNUC_INTERNAL void    g_param_type_deinit     (void); /* sync with gparam.c */
 G_GNUC_INTERNAL void    g_boxed_type_init       (void); /* sync with gboxed.c */
 G_GNUC_INTERNAL void    g_object_type_init      (void); /* sync with gobject.c */
+G_GNUC_INTERNAL void    g_object_type_deinit    (void); /* sync with gobject.c */
 G_GNUC_INTERNAL void    g_param_spec_types_init (void); /* sync with gparamspecs.c */
+G_GNUC_INTERNAL void    g_param_spec_types_deinit (void); /* sync with gparamspecs.c */
 G_GNUC_INTERNAL void    g_value_transforms_init (void); /* sync with gvaluetransform.c */
 G_GNUC_INTERNAL void    g_signal_init           (void); /* sync with gsignal.c */
+G_GNUC_INTERNAL void    g_signal_deinit         (void); /* sync with gsignal.c */
 
 
 /* --- implementation bits --- */

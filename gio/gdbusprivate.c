@@ -296,6 +296,14 @@ invoke_caller (gpointer user_data)
   return FALSE;
 }
 
+static gboolean
+quit_main_loop (gpointer user_data)
+{
+  GMainLoop *loop = user_data;
+  g_main_loop_quit (loop);
+  return FALSE;
+}
+
 /* ---------------------------------------------------------------------------------------------------- */
 
 static void
@@ -318,7 +326,8 @@ _g_dbus_shared_thread_ref (GDBusSharedThreadFunc func,
     }
 
   shared_thread_data = g_new0 (SharedThreadData, 1);
-  shared_thread_data->num_users = 1;
+  /* Keep an extra ref to avoid last ref being dropped from within the shared thread itself */
+  shared_thread_data->num_users = 2;
 
   /* Work-around for https://bugzilla.gnome.org/show_bug.cgi?id=627724 */
   ensure_required_types ();
@@ -364,26 +373,30 @@ _g_dbus_shared_thread_ref (GDBusSharedThreadFunc func,
 static void
 _g_dbus_shared_thread_unref (void)
 {
-  /* TODO: actually destroy the shared thread here */
-#if 0
   G_LOCK (shared_thread_lock);
   g_assert (shared_thread_data != NULL);
   shared_thread_data->num_users -= 1;
   if (shared_thread_data->num_users == 0)
     {
-      g_main_loop_quit (shared_thread_data->loop);
-      //g_thread_join (shared_thread_data->thread);
+      GSource *idle_source;
+
+      idle_source = g_idle_source_new ();
+      g_source_set_priority (idle_source, G_PRIORITY_DEFAULT_IDLE);
+      g_source_set_callback (idle_source,
+                             quit_main_loop,
+                             shared_thread_data->loop,
+                             NULL);
+      g_source_attach (idle_source, shared_thread_data->context);
+      g_source_unref (idle_source);
+
+      g_thread_join (shared_thread_data->thread);
+
       g_main_loop_unref (shared_thread_data->loop);
       g_main_context_unref (shared_thread_data->context);
       g_free (shared_thread_data);
       shared_thread_data = NULL;
-      G_UNLOCK (shared_thread_lock);
     }
-  else
-    {
-      G_UNLOCK (shared_thread_lock);
-    }
-#endif
+  G_UNLOCK (shared_thread_lock);
 }
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -1657,6 +1670,20 @@ _g_dbus_initialize (void)
 
       g_once_init_leave (&initialized, 1);
     }
+}
+
+void
+_g_dbus_deinitialize (void)
+{
+  if (shared_thread_data)
+    {
+      g_assert_cmpint (shared_thread_data->num_users, ==, 1); /* if not, there's a leak */
+      _g_dbus_shared_thread_unref ();
+    }
+
+  _g_dbus_connection_deinit ();
+
+  _g_dbus_error_deinit ();
 }
 
 /* ---------------------------------------------------------------------------------------------------- */

@@ -36,6 +36,9 @@ void            _g_type_boxed_init      (GType          type,
                                          GBoxedCopyFunc copy_func,
                                          GBoxedFreeFunc free_func);
 
+/* for gtype.c */
+void _g_object_release_resources_owned_by (GType type);
+
 G_END_DECLS
 
 #endif /* __G_TYPE_PRIVATE_H__ */

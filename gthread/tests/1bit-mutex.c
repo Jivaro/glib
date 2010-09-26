@@ -35,6 +35,7 @@
   #define g_bit_trylock         _emufutex_g_bit_trylock
   #define g_bit_unlock          _emufutex_g_bit_unlock
   #define _g_futex_thread_init  _emufutex_g_futex_thread_init
+  #define _g_futex_thread_deinit _emufutex_g_futex_thread_deinit
 
   #define G_BIT_LOCK_FORCE_FUTEX_EMULATION
 

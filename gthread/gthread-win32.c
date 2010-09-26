@@ -45,6 +45,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "gtinylist.c"
+
 #define win32_check_for_error(what) G_STMT_START{			\
   if (!(what))								\
     g_error ("file %s: line %d (%s): error %s during %s",		\
@@ -60,6 +62,8 @@
 #define PRIORITY_URGENT_VALUE THREAD_PRIORITY_HIGHEST
 
 static DWORD g_thread_self_tls;
+
+static GTinyList *thread_data_list = NULL;
 static DWORD g_private_tls;
 static DWORD g_cond_event_tls;
 static CRITICAL_SECTION g_thread_global_spinlock;
@@ -392,10 +396,14 @@ static void
 g_thread_self_win32_impl (gpointer thread)
 {
   GThreadData *self = TlsGetValue (g_thread_self_tls);
+  gboolean thread_data_was_created = FALSE;
 
   if (!self)
     {
-      /* This should only happen for the main thread! */
+      /*
+       * This will only happen for the main thread, unless a thread was
+       * spawned using a different API than GThread.
+       */
       HANDLE handle = GetCurrentThread ();
       HANDLE process = GetCurrentProcess ();
       self = g_new (GThreadData, 1);
@@ -406,13 +414,33 @@ g_thread_self_win32_impl (gpointer thread)
       self->func = NULL;
       self->data = NULL;
       self->joinable = FALSE;
+
+      thread_data_was_created = TRUE;
     }
 
   *(GThreadData **)thread = self;
+
+  if (thread_data_was_created)
+    {
+      EnterCriticalSection (&g_thread_global_spinlock);
+      thread_data_list = g_tinylist_prepend (thread_data_list, self);
+      LeaveCriticalSection (&g_thread_global_spinlock);
+    }
 }
 
 static void
-g_thread_exit_win32_impl (void)
+g_thread_data_finalize (GThreadData *self)
+{
+  win32_check_for_error (CloseHandle (self->thread));
+  g_free (self);
+
+  EnterCriticalSection (&g_thread_global_spinlock);
+  thread_data_list = g_tinylist_remove (thread_data_list, self);
+  LeaveCriticalSection (&g_thread_global_spinlock);
+}
+
+static void
+g_thread_cleanup_self (void)
 {
   GThreadData *self = TlsGetValue (g_thread_self_tls);
   guint i, private_max;
@@ -452,10 +480,7 @@ g_thread_exit_win32_impl (void)
   if (self)
     {
       if (!self->joinable)
-	{
-	  win32_check_for_error (CloseHandle (self->thread));
-	  g_free (self);
-	}
+        g_thread_data_finalize (self);
       win32_check_for_error (TlsSetValue (g_thread_self_tls, NULL));
     }
 
@@ -464,6 +489,12 @@ g_thread_exit_win32_impl (void)
       CloseHandle (event);
       win32_check_for_error (TlsSetValue (g_cond_event_tls, NULL));
     }
+}
+
+static void
+g_thread_exit_win32_impl (void)
+{
+  g_thread_cleanup_self ();
 
   _endthreadex (0);
 }
@@ -541,8 +572,7 @@ g_thread_join_win32_impl (gpointer thread)
   win32_check_for_error (WAIT_FAILED !=
 			 WaitForSingleObject (target->thread, INFINITE));
 
-  win32_check_for_error (CloseHandle (target->thread));
-  g_free (target);
+  g_thread_data_finalize (target);
 }
 
 static guint64
@@ -636,4 +666,18 @@ g_thread_impl_init ()
 	    g_mutex_free_win32_cs_impl;
 	}
     }
+}
+
+static void
+g_thread_impl_deinit (void)
+{
+  g_thread_cleanup_self ();
+
+  g_tinylist_foreach (thread_data_list, (GFunc) g_thread_data_finalize, NULL);
+
+  DeleteCriticalSection (&g_thread_global_spinlock);
+
+  TlsFree (g_cond_event_tls);
+  TlsFree (g_private_tls);
+  TlsFree (g_thread_self_tls);
 }

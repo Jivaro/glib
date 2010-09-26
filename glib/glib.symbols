@@ -639,6 +639,7 @@ g_malloc_n
 g_malloc0_n
 g_mem_is_system_malloc
 g_mem_profile
+g_mem_deinit
 g_mem_set_vtable
 g_realloc
 g_realloc_n
@@ -1060,6 +1061,7 @@ g_once_impl
 g_once_init_enter_impl
 g_once_init_leave
 g_thread_init_glib
+g_thread_deinit_glib
 g_once_init_enter
 g_thread_functions_for_glib_use
 g_threads_got_initialized
@@ -1128,6 +1130,7 @@ g_test_create_suite
 g_test_fail
 g_test_get_root
 g_test_init
+g_test_deinit
 g_test_log_buffer_free
 g_test_log_buffer_new
 g_test_log_buffer_pop

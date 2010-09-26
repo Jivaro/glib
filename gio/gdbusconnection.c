@@ -457,6 +457,16 @@ G_DEFINE_TYPE_WITH_CODE (GDBusConnection, g_dbus_connection, G_TYPE_OBJECT,
 
 static GHashTable *alive_connections = NULL;
 
+void
+_g_dbus_connection_deinit (void)
+{
+  if (alive_connections != NULL)
+    {
+      g_hash_table_unref (alive_connections);
+      alive_connections = NULL;
+    }
+}
+
 static void
 g_dbus_connection_dispose (GObject *object)
 {

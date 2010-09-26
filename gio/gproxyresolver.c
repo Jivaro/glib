@@ -31,6 +31,7 @@
 #include "gcancellable.h"
 #include "giomodule.h"
 #include "giomodule-priv.h"
+#include "gioprivate.h"
 #include "gsimpleasyncresult.h"
 
 /**
@@ -45,13 +46,17 @@
 
 G_DEFINE_INTERFACE (GProxyResolver, g_proxy_resolver, G_TYPE_OBJECT)
 
+static GProxyResolver *default_proxy_resolver = NULL;
+static gboolean default_proxy_resolver_initialized = FALSE;
+G_LOCK_DEFINE_STATIC (default_proxy_resolver);
+
 static void
 g_proxy_resolver_default_init (GProxyResolverInterface *iface)
 {
 }
 
-static gpointer
-get_default_proxy_resolver (gpointer arg)
+static GProxyResolver *
+get_default_proxy_resolver (void)
 {
   const gchar *use_this;
   GProxyResolver *resolver;
@@ -108,9 +113,17 @@ get_default_proxy_resolver (gpointer arg)
 GProxyResolver *
 g_proxy_resolver_get_default (void)
 {
-  static GOnce once_init = G_ONCE_INIT;
+  G_LOCK (default_proxy_resolver);
 
-  return g_once (&once_init, get_default_proxy_resolver, NULL);
+  if (!default_proxy_resolver_initialized)
+  {
+    default_proxy_resolver = get_default_proxy_resolver ();
+    default_proxy_resolver_initialized = TRUE;
+  }
+
+  G_UNLOCK (default_proxy_resolver);
+
+  return default_proxy_resolver;
 }
 
 /**
@@ -240,4 +253,14 @@ g_proxy_resolver_lookup_finish (GProxyResolver     *resolver,
   iface = G_PROXY_RESOLVER_GET_IFACE (resolver);
 
   return (* iface->lookup_finish) (resolver, result, error);
+}
+
+void
+_g_proxy_resolver_deinit (void)
+{
+  if (default_proxy_resolver)
+  {
+    g_object_unref (default_proxy_resolver);
+    default_proxy_resolver = NULL;
+  }
 }

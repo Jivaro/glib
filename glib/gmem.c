@@ -37,6 +37,7 @@
 #include <signal.h>
 
 #include "gbacktrace.h"
+#include "gmemprivate.h"
 #include "gtestutils.h"
 #include "gthread.h"
 #include "glib_trace.h"
@@ -536,6 +537,18 @@ gboolean
 g_mem_is_system_malloc (void)
 {
   return !vtable_set;
+}
+
+void
+g_mem_deinit (void)
+{
+  _g_main_deinit ();
+  _g_dataset_deinit ();
+  _g_quark_deinit ();
+  _g_utils_deinit ();
+  _g_rand_deinit ();
+  _g_convert_deinit ();
+  _g_slice_deinit ();
 }
 
 /**
@@ -1393,5 +1406,14 @@ _g_mem_thread_init_noprivate_nomessage (void)
   g_mem_init_nomessage();
 #ifndef G_DISABLE_CHECKS
   gmem_profile_mutex = g_mutex_new ();
+#endif
+}
+
+void
+_g_mem_thread_deinit_noprivate_nomessage (void)
+{
+#ifndef G_DISABLE_CHECKS
+  g_mutex_free (gmem_profile_mutex);
+  gmem_profile_mutex = NULL;
 #endif
 }

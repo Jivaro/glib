@@ -46,6 +46,14 @@ _g_futex_thread_init (void) {
 #endif
 }
 
+void
+_g_futex_thread_deinit (void) {
+#ifndef HAVE_FUTEX
+  g_mutex_free (g_futex_mutex);
+  g_futex_mutex = NULL;
+#endif
+}
+
 #ifdef HAVE_FUTEX
 /*
  * We have headers for futex(2) on the build machine.  This does not

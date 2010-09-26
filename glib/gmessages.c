@@ -1107,6 +1107,15 @@ _g_messages_thread_init_nomessage (void)
   _g_debug_init ();
 }
 
+void
+_g_messages_thread_deinit_nomessage (void)
+{
+  g_mutex_free (g_messages_lock);
+  g_messages_lock = NULL;
+
+  g_log_depth = NULL;
+}
+
 gboolean _g_debug_initialized = FALSE;
 guint _g_debug_flags = 0;
 

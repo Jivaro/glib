@@ -64,6 +64,7 @@ extern char ***_NSGetEnviron(void);
 
 #include "gfileutils.h"
 #include "ghash.h"
+#include "gmemprivate.h"
 #include "gslist.h"
 #include "gprintfint.h"
 #include "gthread.h"
@@ -1864,6 +1865,53 @@ g_get_any_init_locked (void)
   G_UNLOCK (g_utils_global);
 }
 
+#define G_FREE_AND_NULLIFY(p) \
+  G_STMT_START \
+    { \
+      g_free (p); \
+      p = NULL; \
+    } \
+  G_STMT_END
+#define G_STRFREEV_AND_NULLIFY(p) \
+  G_STMT_START \
+    { \
+      g_strfreev (p); \
+      p = NULL; \
+    } \
+  G_STMT_END
+
+static void
+g_get_any_deinit (void)
+{
+  G_FREE_AND_NULLIFY (g_tmp_dir);
+  G_FREE_AND_NULLIFY (g_user_name);
+  G_FREE_AND_NULLIFY (g_real_name);
+  G_FREE_AND_NULLIFY (g_home_dir);
+  G_FREE_AND_NULLIFY (g_host_name);
+
+#ifdef G_OS_WIN32
+  G_FREE_AND_NULLIFY (g_tmp_dir_cp);
+  G_FREE_AND_NULLIFY (g_user_name_cp);
+  G_FREE_AND_NULLIFY (g_real_name_cp);
+  G_FREE_AND_NULLIFY (g_home_dir_cp);
+#endif
+
+  G_FREE_AND_NULLIFY (g_user_data_dir);
+  G_STRFREEV_AND_NULLIFY (g_system_data_dirs);
+  G_FREE_AND_NULLIFY (g_user_cache_dir);
+  G_FREE_AND_NULLIFY (g_user_config_dir);
+  G_STRFREEV_AND_NULLIFY (g_system_config_dirs);
+
+  if (g_user_special_dirs != NULL)
+    {
+      guint i;
+
+      for (i = 0; i != G_USER_N_DIRECTORIES; i++)
+        g_free (g_user_special_dirs[i]);
+
+      G_FREE_AND_NULLIFY (g_user_special_dirs);
+    }
+}
 
 /**
  * g_get_user_name:
@@ -3563,6 +3611,14 @@ void
 _g_utils_thread_init (void)
 {
   g_get_language_names ();
+}
+
+void
+_g_utils_deinit (void)
+{
+  G_FREE_AND_NULLIFY (g_prgname);
+
+  g_get_any_deinit ();
 }
 
 #ifdef G_OS_WIN32

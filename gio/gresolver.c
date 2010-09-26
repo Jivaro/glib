@@ -25,6 +25,7 @@
 #include "glibintl.h"
 
 #include "gresolver.h"
+#include "gioprivate.h"
 #include "gnetworkingprivate.h"
 #include "gasyncresult.h"
 #include "ginetaddress.h"
@@ -974,3 +975,13 @@ _g_resolver_targets_from_DnsQuery (const gchar  *rrname,
 }
 
 #endif
+
+void
+_g_resolver_deinit (void)
+{
+  if (default_resolver)
+    {
+      g_object_unref (default_resolver);
+      default_resolver = NULL;
+    }
+}

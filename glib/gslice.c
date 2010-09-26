@@ -187,6 +187,7 @@ static gpointer     slab_allocator_alloc_chunk       (gsize      chunk_size);
 static void         slab_allocator_free_chunk        (gsize      chunk_size,
                                                       gpointer   mem);
 static void         private_thread_memory_cleanup    (gpointer   data);
+static void         allocator_cleanup                (void);
 static gpointer     allocator_memalign               (gsize      alignment,
                                                       gsize      memsize);
 static void         allocator_memfree                (gsize      memsize,
@@ -203,6 +204,7 @@ static int      smc_notify_free   (void   *pointer,
 
 /* --- variables --- */
 static GPrivate   *private_thread_memory = NULL;
+static ThreadMemory *single_thread_memory = NULL; /* remember single-thread info for multi-threaded case */
 static gsize       sys_page_size = 0;
 static Allocator   allocator[1] = { { 0, }, };
 static SliceConfig slice_config = {
@@ -362,6 +364,15 @@ g_slice_init_nomessage (void)
    */
 }
 
+void
+_g_slice_deinit (void)
+{
+  g_free (single_thread_memory);
+  single_thread_memory = NULL;
+
+  allocator_cleanup ();
+}
+
 static inline guint
 allocator_categorize (gsize aligned_chunk_size)
 {
@@ -405,6 +416,24 @@ _g_slice_thread_init_nomessage (void)
     smc_tree_mutex = g_mutex_new();
 }
 
+void
+_g_slice_thread_deinit_nomessage (void)
+{
+  private_thread_memory = NULL;
+
+  g_mutex_free (allocator->magazine_mutex);
+  allocator->magazine_mutex = NULL;
+
+  g_mutex_free (allocator->slab_mutex);
+  allocator->slab_mutex = NULL;
+
+  if (smc_tree_mutex)
+    {
+      g_mutex_free (smc_tree_mutex);
+      smc_tree_mutex = NULL;
+    }
+}
+
 static inline void
 g_mutex_lock_a (GMutex *mutex,
                 guint  *contention_counter)
@@ -441,7 +470,6 @@ thread_memory_from_self (void)
   ThreadMemory *tmem = g_private_get (private_thread_memory);
   if (G_UNLIKELY (!tmem))
     {
-      static ThreadMemory *single_thread_memory = NULL;   /* remember single-thread info for multi-threaded case */
       if (single_thread_memory && g_thread_supported ())
         {
           g_mutex_lock (allocator->slab_mutex);
@@ -1145,8 +1173,36 @@ slab_allocator_free_chunk (gsize    chunk_size,
  */
 
 #if !(HAVE_COMPLIANT_POSIX_MEMALIGN || HAVE_MEMALIGN || HAVE_VALLOC)
+static gpointer    *compat_allocations = NULL;
+static guint        compat_n_allocations = 0;
 static GTrashStack *compat_valloc_trash = NULL;
 #endif
+
+static void
+allocator_cleanup (void)
+{
+#if     HAVE_COMPLIANT_POSIX_MEMALIGN || HAVE_MEMALIGN || HAVE_VALLOC
+  /* no need to clean up slabs, they go away when the last chunk is freed */
+#else
+  guint i;
+
+  for (i = 0; i != compat_n_allocations; i++)
+    free (compat_allocations[i]);
+  free (compat_allocations);
+  compat_allocations = NULL;
+  compat_n_allocations = 0;
+  compat_valloc_trash = NULL;
+#endif
+
+  g_free (allocator->contention_counters);
+  allocator->contention_counters = NULL;
+
+  g_free (allocator->magazines);
+  allocator->magazines = NULL;
+
+  g_free (allocator->slab_stack);
+  allocator->slab_stack = NULL;
+}
 
 static gpointer
 allocator_memalign (gsize alignment,
@@ -1173,6 +1229,12 @@ allocator_memalign (gsize alignment,
       const guint n_pages = 16;
       guint8 *mem = malloc (n_pages * sys_page_size);
       err = errno;
+
+      compat_n_allocations++;
+      compat_allocations = realloc (compat_allocations,
+          compat_n_allocations * sizeof (gpointer));
+      compat_allocations[compat_n_allocations - 1] = mem;
+
       if (mem)
         {
           gint i = n_pages;

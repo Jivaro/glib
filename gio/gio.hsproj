@@ -51,6 +51,7 @@
     <Package Include="gmodule-$(GLibVersionApi)" />
 
     <!-- core -->
+    <ClCompile Include="gio.c" />
     <ClCompile Include="gappinfo.c" />
     <ClCompile Include="gasynchelper.c" />
     <ClCompile Include="gasyncinitable.c" />

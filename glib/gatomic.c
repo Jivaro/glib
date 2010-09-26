@@ -1202,6 +1202,15 @@ _g_atomic_thread_init (void)
 #endif /* DEFINE_WITH_MUTEXES */
 }
 
+void
+_g_atomic_thread_deinit (void)
+{
+#ifdef DEFINE_WITH_MUTEXES
+  g_mutex_free (g_atomic_mutex);
+  g_atomic_mutex = NULL;
+#endif /* DEFINE_WITH_MUTEXES */
+}
+
 #ifndef G_ATOMIC_OP_MEMORY_BARRIER_NEEDED
 gint
 (g_atomic_int_get) (volatile gint G_GNUC_MAY_ALIAS *atomic)

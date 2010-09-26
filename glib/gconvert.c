@@ -43,6 +43,7 @@
 
 #include "gconvert.h"
 
+#include "gmemprivate.h"
 #include "gprintfint.h"
 #include "gslist.h"
 #include "gstrfuncs.h"
@@ -345,6 +346,10 @@ struct _iconv_cache_bucket {
   GIConv cd;
 };
 
+static void iconv_cache_bucket_expire (GList *node,
+    struct _iconv_cache_bucket *bucket);
+
+static gboolean iconv_cache_initialized = FALSE;
 static GList *iconv_cache_list;
 static GHashTable *iconv_cache;
 static GHashTable *iconv_open_hash;
@@ -355,18 +360,45 @@ G_LOCK_DEFINE_STATIC (iconv_cache_lock);
 static void
 iconv_cache_init (void)
 {
-  static gboolean initialized = FALSE;
-  
-  if (initialized)
+  if (iconv_cache_initialized)
     return;
   
   iconv_cache_list = NULL;
   iconv_cache = g_hash_table_new (g_str_hash, g_str_equal);
   iconv_open_hash = g_hash_table_new (g_direct_hash, g_direct_equal);
   
-  initialized = TRUE;
+  iconv_cache_initialized = TRUE;
 }
 
+static void
+iconv_cache_deinit (void)
+{
+  struct _iconv_cache_bucket *bucket;
+  GList *node, *next;
+
+  if (!iconv_cache_initialized)
+    return;
+
+  node = iconv_cache_list;
+  while (node)
+    {
+      next = node->next;
+
+      bucket = node->data;
+      iconv_cache_bucket_expire (node, bucket);
+
+      node = next;
+    }
+  g_assert (iconv_cache_list == NULL);
+
+  g_hash_table_unref (iconv_cache);
+  iconv_cache = NULL;
+
+  g_hash_table_unref (iconv_open_hash);
+  iconv_open_hash = NULL;
+
+  iconv_cache_initialized = FALSE;
+}
 
 /*
  * iconv_cache_bucket_new:
@@ -1430,6 +1462,14 @@ _g_convert_thread_init (void)
 {
   const gchar **dummy;
   (void) g_get_filename_charsets (&dummy);
+}
+
+void
+_g_convert_deinit (void)
+{
+#ifdef NEED_ICONV_CACHE
+  iconv_cache_deinit ();
+#endif
 }
 
 /**

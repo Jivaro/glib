@@ -133,6 +133,8 @@ void    g_thread_init   (GThreadFunctions       *vtable);
  */
 void    g_thread_init_with_errorcheck_mutexes (GThreadFunctions* vtable);
 
+void    g_thread_deinit (void);
+
 /* Checks if thread support is initialized.  Identical to the
  * g_thread_supported macro but provided for language bindings.
  */

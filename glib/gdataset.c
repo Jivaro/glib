@@ -38,6 +38,7 @@
 
 #include "gdatasetprivate.h"
 #include "ghash.h"
+#include "gmemprivate.h"
 #include "gquark.h"
 #include "gstrfuncs.h"
 #include "gtestutils.h"
@@ -188,8 +189,40 @@ G_LOCK_DEFINE_STATIC (g_quark_global);
 static GHashTable   *g_quark_ht = NULL;
 static gchar       **g_quarks = NULL;
 static GQuark        g_quark_seq_id = 0;
+static GSList       *g_quark_blocks = NULL;
 
 /* --- functions --- */
+
+void
+_g_dataset_deinit (void)
+{
+  if (g_dataset_location_ht)
+    {
+      g_hash_table_unref (g_dataset_location_ht);
+      g_dataset_location_ht = NULL;
+    }
+
+  g_dataset_cached = NULL;
+}
+
+void
+_g_quark_deinit (void)
+{
+  if (g_quark_ht)
+    {
+      g_hash_table_unref (g_quark_ht);
+      g_quark_ht = NULL;
+    }
+
+  g_free (g_quarks);
+  g_quarks = NULL;
+
+  g_quark_seq_id = 0;
+
+  g_slist_foreach (g_quark_blocks, (GFunc) g_free, NULL);
+  g_slist_free (g_quark_blocks);
+  g_quark_blocks = NULL;
+}
 
 /* HOLDS: g_dataset_global_lock */
 static inline void
@@ -1028,13 +1061,18 @@ quark_strdup(const gchar *string)
   /* For strings longer than half the block size, fall back
      to strdup so that we fill our blocks at least 50%. */
   if (len > QUARK_STRING_BLOCK_SIZE / 2)
-    return g_strdup (string);
+    {
+      copy = g_strdup (string);
+      g_quark_blocks = g_slist_prepend (g_quark_blocks, copy);
+      return copy;
+    }
 
   if (quark_block == NULL ||
       QUARK_STRING_BLOCK_SIZE - quark_block_offset < len)
     {
       quark_block = g_malloc (QUARK_STRING_BLOCK_SIZE);
       quark_block_offset = 0;
+      g_quark_blocks = g_slist_prepend (g_quark_blocks, quark_block);
     }
 
   copy = quark_block + quark_block_offset;

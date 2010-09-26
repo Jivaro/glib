@@ -80,6 +80,7 @@
 #include "giochannel.h"
 #include "ghash.h"
 #include "ghook.h"
+#include "gmemprivate.h"
 #include "gqueue.h"
 #include "gstrfuncs.h"
 #include "gtestutils.h"
@@ -649,6 +650,19 @@ _g_main_thread_init (void)
   main_contexts_without_pipe = NULL;  
 }
 #endif /* G_THREADS_ENABLED */
+
+void
+_g_main_deinit (void)
+{
+  if (default_main_context)
+    {
+      g_main_context_unref (default_main_context);
+      default_main_context = NULL;
+    }
+
+  g_slist_free (main_contexts_without_pipe);
+  main_contexts_without_pipe = NULL;
+}
 
 /**
  * g_main_context_new:

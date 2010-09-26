@@ -51,6 +51,7 @@
 
 #include "gmain.h"
 #include "gmem.h"
+#include "gmemprivate.h"
 #include "gtestutils.h"
 #include "gthread.h"
 #include "gthreadprivate.h"
@@ -160,6 +161,16 @@ void
 _g_rand_thread_init (void)
 {
   (void)get_random_version ();
+}
+
+void 
+_g_rand_deinit (void)
+{
+  if (global_random)
+    {
+      g_rand_free (global_random);
+      global_random = NULL;
+    }
 }
 
 struct _GRand

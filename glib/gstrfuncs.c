@@ -3142,7 +3142,7 @@ _g_dgettext_should_translate (void)
 #ifndef G_OS_WIN32
       const char *translate_locale   = setlocale (LC_MESSAGES, NULL);
 #else
-      const char *translate_locale   = g_win32_getlocale ();
+      char *translate_locale   = g_win32_getlocale ();
 #endif
       /* We should NOT translate only if all the following hold:
        *   - user has called textdomain() and set textdomain to non-default
@@ -3163,6 +3163,10 @@ _g_dgettext_should_translate (void)
           0 != strncmp (translate_locale, "en_", 3) &&
           0 != strcmp (translate_locale, "C"))
         should_translate = FALSE;
+
+#ifdef G_OS_WIN32
+      g_free (translate_locale);
+#endif
 
       g_once_init_leave (&translate,
                          should_translate ?

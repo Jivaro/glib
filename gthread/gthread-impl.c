@@ -360,6 +360,14 @@ g_thread_init (GThreadFunctions* init)
   g_thread_init_glib ();
 }
 
+void
+g_thread_deinit (void)
+{
+  g_thread_deinit_glib ();
+
+  g_thread_impl_deinit ();
+}
+
 #else /* !G_THREADS_ENABLED */
 
 void
@@ -370,6 +378,12 @@ g_thread_init (GThreadFunctions* init)
 
 void
 g_thread_init_with_errorcheck_mutexes (GThreadFunctions* init)
+{
+  g_error ("GLib thread support is disabled.");
+}
+
+void
+g_thread_deinit (void)
 {
   g_error ("GLib thread support is disabled.");
 }

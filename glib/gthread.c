@@ -61,6 +61,7 @@
 #include "gtestutils.h"
 #include "gtimer.h"
 
+#include "gtinylist.c"
 
 /**
  * SECTION:threads
@@ -861,6 +862,7 @@ GThreadFunctions g_thread_functions_for_glib_use = {
 
 static GMutex   *g_once_mutex = NULL;
 static GCond    *g_once_cond = NULL;
+static GTinyList *g_thread_static_mutexes = NULL;
 static GPrivate *g_thread_specific_private = NULL;
 static GRealThread *g_thread_all_threads = NULL;
 static GSList   *g_thread_free_indeces = NULL;
@@ -946,6 +948,38 @@ g_thread_init_glib (void)
 #ifdef G_OS_WIN32
   _g_win32_thread_init ();
 #endif
+}
+
+void
+g_thread_deinit_glib (void)
+{
+  GTinyList *walk;
+
+  _g_thread_pool_deinit ();
+  g_assert (g_thread_all_threads != NULL);
+  g_assert (g_thread_all_threads->next == NULL); /* only main thread left */
+
+  _g_futex_thread_deinit ();
+
+  _g_messages_thread_deinit_nomessage ();
+
+  g_cond_free (g_once_cond);
+  g_once_cond = NULL;
+
+  g_mutex_free (g_once_mutex);
+  g_once_mutex = NULL;
+
+  for (walk = g_thread_static_mutexes; walk != NULL; walk = walk->next)
+    g_mutex_free (walk->data);
+  g_tinylist_free (g_thread_static_mutexes);
+  g_thread_static_mutexes = NULL;
+
+  _g_slice_thread_deinit_nomessage ();
+
+  _g_mem_thread_deinit_noprivate_nomessage ();
+
+  g_thread_specific_private = NULL;
+  g_threads_got_initialized = FALSE;
 }
 #endif /* G_THREADS_ENABLED */
 
@@ -1268,7 +1302,14 @@ g_static_mutex_get_mutex_impl (GMutex** mutex)
   g_mutex_lock (g_once_mutex);
 
   if (!(*mutex))
-    g_atomic_pointer_set (mutex, g_mutex_new());
+    {
+      GMutex *m;
+
+      m = g_mutex_new ();
+      g_thread_static_mutexes =
+          g_tinylist_prepend (g_thread_static_mutexes, m);
+      g_atomic_pointer_set (mutex, m);
+    }
 
   g_mutex_unlock (g_once_mutex);
 
@@ -1334,7 +1375,14 @@ g_static_mutex_free (GStaticMutex* mutex)
   runtime_mutex = ((GMutex**)mutex);
 
   if (*runtime_mutex)
-    g_mutex_free (*runtime_mutex);
+    {
+      g_mutex_lock (g_once_mutex);
+      g_thread_static_mutexes = g_tinylist_remove (g_thread_static_mutexes,
+          *runtime_mutex);
+      g_mutex_unlock (g_once_mutex);
+
+      g_mutex_free (*runtime_mutex);
+    }
 
   *runtime_mutex = NULL;
 }

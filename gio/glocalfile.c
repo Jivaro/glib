@@ -84,6 +84,7 @@
 #include "gmountprivate.h"
 #include "gunixmounts.h"
 #include "gioerror.h"
+#include "gioprivate.h"
 #include <glib/gstdio.h>
 #include "glibintl.h"
 
@@ -202,6 +203,16 @@ g_local_file_class_init (GLocalFileClass *klass)
 #endif
 
   local_writable_attributes = list;
+}
+
+void
+_g_local_file_deinit (void)
+{
+  if (local_writable_attributes != NULL)
+    {
+      g_file_attribute_info_list_unref (local_writable_attributes);
+      local_writable_attributes = NULL;
+    }
 }
 
 static void

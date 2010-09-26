@@ -47,6 +47,8 @@
 #include <sched.h>
 #endif
 
+#include "gtinylist.c"
+
 #define posix_check_err(err, name) G_STMT_START{			\
   int error = (err); 							\
   if (error)	 		 		 			\
@@ -124,6 +126,10 @@ static gulong g_thread_min_stack_size = 0;
 static gint posix_clock = 0;
 #endif
 
+static pthread_mutex_t g_thread_state_lock;
+
+static GTinyList *g_thread_tls_keys = NULL;
+
 #if defined(_SC_THREAD_STACK_MIN) || defined (HAVE_PRIORITIES) || defined (USE_CLOCK_GETTIME)
 #define HAVE_G_THREAD_IMPL_INIT
 static void
@@ -153,8 +159,29 @@ g_thread_impl_init(void)
  else
    posix_clock = CLOCK_REALTIME;
 #endif
+
+  posix_check_cmd (pthread_mutex_init (&g_thread_state_lock,
+				       mutexattr_default));
 }
 #endif /* _SC_THREAD_STACK_MIN || HAVE_PRIORITIES */
+
+static void
+g_thread_impl_deinit (void)
+{
+  GTinyList *walk;
+
+  for (walk = g_thread_tls_keys; walk; walk = walk->next)
+    {
+      pthread_key_t *key = walk->data;
+
+      posix_check_cmd (pthread_key_delete (*key));
+      g_free (key);
+    }
+  g_tinylist_free (g_thread_tls_keys);
+  g_thread_tls_keys = NULL;
+
+  posix_check_cmd (pthread_mutex_destroy (&g_thread_state_lock));
+}
 
 static GMutex *
 g_mutex_new_posix_impl (void)
@@ -266,7 +293,13 @@ static GPrivate *
 g_private_new_posix_impl (GDestroyNotify destructor)
 {
   GPrivate *result = (GPrivate *) g_new (pthread_key_t, 1);
+
   posix_check_cmd (pthread_key_create ((pthread_key_t *) result, destructor));
+
+  pthread_mutex_lock (&g_thread_state_lock);
+  g_thread_tls_keys = g_tinylist_prepend (g_thread_tls_keys, result);
+  pthread_mutex_unlock (&g_thread_state_lock);
+
   return result;
 }
 
