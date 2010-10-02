@@ -587,9 +587,8 @@ _g_io_modules_ensure_loaded (void)
 
   if (!loaded_dirs)
     {
+#ifndef GLIB_STATIC_COMPILATION
       gchar *module_dir;
-
-      loaded_dirs = TRUE;
 
       module_dir = g_io_get_module_dir ();
       g_io_modules_scan_all_in_directory (module_dir);
@@ -609,6 +608,9 @@ _g_io_modules_ensure_loaded (void)
 
 	  g_strfreev (paths);
 	}
+#endif
+
+      loaded_dirs = TRUE;
 
       /* Initialize types from built-in "modules" */
       g_null_settings_backend_get_type ();
