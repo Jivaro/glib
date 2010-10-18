@@ -32,10 +32,21 @@
 #define __G_WIN32_H__
 
 #include <glib/gtypes.h>
+#include <glib/gmain.h>
 
 #ifdef G_PLATFORM_WIN32
 
 G_BEGIN_DECLS
+
+typedef struct _GWin32Dispatcher GWin32Dispatcher;
+
+typedef enum _GWin32DispatchMode GWin32DispatchMode;
+
+enum _GWin32DispatchMode
+{
+  G_DISPATCH_MAINLOOP,
+  G_DISPATCH_MESSAGEPUMP
+};
 
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 1024
@@ -102,6 +113,11 @@ gchar*          g_win32_get_package_installation_directory_of_module (gpointer h
 guint		g_win32_get_windows_version (void);
 
 gchar*          g_win32_locale_filename_from_utf8 (const gchar *utf8filename);
+
+GWin32Dispatcher * g_win32_dispatcher_new (GWin32DispatchMode mode, GMainContext * main_context);
+void               g_win32_dispatcher_destroy (GWin32Dispatcher * dispatcher);
+
+glong              g_win32_dispatcher_dispatch_message (GWin32Dispatcher * dispatcher, gconstpointer msg);
 
 /* As of GLib 2.14 we only support NT-based Windows */
 #define G_WIN32_IS_NT_BASED() TRUE
