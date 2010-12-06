@@ -616,15 +616,21 @@ g_assert_warning (const char *log_domain,
 		  const char *pretty_function,
 		  const char *expression)
 {
-  g_log (log_domain,
-	 G_LOG_LEVEL_ERROR,
-	 expression 
-	 ? "file %s: line %d (%s): assertion failed: (%s)"
-	 : "file %s: line %d (%s): should not be reached",
-	 file, 
-	 line, 
-	 pretty_function,
-	 expression);
+  if (expression)
+    g_log (log_domain,
+        G_LOG_LEVEL_ERROR,
+        "file %s: line %d (%s): assertion failed: (%s)",
+        file, 
+        line, 
+        pretty_function,
+        expression);
+  else
+      g_log (log_domain,
+          G_LOG_LEVEL_ERROR,
+          "file %s: line %d (%s): should not be reached",
+          file, 
+          line, 
+          pretty_function);
   abort ();
 }
 
