@@ -4444,7 +4444,6 @@ type_data_finalize_class (TypeNode  *node,
 static void
 type_data_finalize (TypeNode *node)
 {
-  GType ptype = NODE_PARENT_TYPE (node);
   TypeData *tdata;
 
   tdata = node->data;

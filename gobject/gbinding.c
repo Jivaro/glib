@@ -747,7 +747,7 @@ g_binding_get_source_property (GBinding *binding)
 {
   g_return_val_if_fail (G_IS_BINDING (binding), NULL);
 
-  return binding->source_property;
+  return (G_CONST_RETURN gchar *)binding->source_property;
 }
 
 /**
@@ -766,7 +766,7 @@ g_binding_get_target_property (GBinding *binding)
 {
   g_return_val_if_fail (G_IS_BINDING (binding), NULL);
 
-  return binding->target_property;
+  return (G_CONST_RETURN gchar *)binding->target_property;
 }
 
 /**
