@@ -4627,7 +4627,7 @@ deliver_unix_signal (int signum)
   G_UNLOCK (unix_signal_lock);
 }
 
-static gpointer unix_signal_helper_thread (gpointer data) G_GNUC_NORETURN;
+static gpointer unix_signal_helper_thread (gpointer data);
 
 /*
  * This thread is created whenever anything in GLib needs

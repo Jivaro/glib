@@ -791,7 +791,7 @@ g_variant_make_tuple_type (GVariant * const *children,
   for (i = 0; i < n_children; i++)
     types[i] =  (GVariantType *)g_variant_get_type (children[i]);
 
-  type = g_variant_type_new_tuple (types, n_children);
+  type = g_variant_type_new_tuple ((const GVariantType **)types, n_children);
   g_free (types);
 
   return type;
@@ -3332,7 +3332,7 @@ g_variant_format_string_scan (const gchar  *string,
         if (!g_variant_format_string_scan (string, limit, &string))
           return FALSE;
 
-      next_char(); /* consume ')' */
+      (void) next_char(); /* consume ')' */
       break;
 
     case '{':
@@ -3837,7 +3837,7 @@ g_variant_valist_skip_leaf (const gchar **str,
   if (g_variant_format_string_is_nnp (*str))
     {
       g_variant_format_string_scan (*str, NULL, str);
-      va_arg (*app, gpointer);
+      (void) va_arg (*app, gpointer);
       return;
     }
 
@@ -3850,16 +3850,16 @@ g_variant_valist_skip_leaf (const gchar **str,
     case 'i':
     case 'u':
     case 'h':
-      va_arg (*app, int);
+      (void) va_arg (*app, int);
       return;
 
     case 'x':
     case 't':
-      va_arg (*app, guint64);
+      (void) va_arg (*app, guint64);
       return;
 
     case 'd':
-      va_arg (*app, gdouble);
+      (void) va_arg (*app, gdouble);
       return;
 
     default:
@@ -4036,7 +4036,7 @@ g_variant_valist_skip (const gchar **str,
       (*str)++;
 
       if (!g_variant_format_string_is_nnp (*str))
-        va_arg (*app, gboolean);
+        (void) va_arg (*app, gboolean);
 
       g_variant_valist_skip (str, app);
     }

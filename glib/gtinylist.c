@@ -34,6 +34,7 @@ g_tinylist_prepend (GTinyList	*list,
   return new_list;
 }
 
+#if defined(G_OS_WIN32) || defined(__G_THREAD_C__)
 static GTinyList *
 g_tinylist_remove (GTinyList	*list,
 		   gconstpointer data)
@@ -59,7 +60,9 @@ g_tinylist_remove (GTinyList	*list,
 
   return list;
 }
+#endif
 
+#ifdef G_OS_WIN32
 static void
 g_tinylist_foreach (GTinyList	*list,
 		    GFunc	 func,
@@ -72,3 +75,4 @@ g_tinylist_foreach (GTinyList	*list,
       list = next;
     }
 }
+#endif
