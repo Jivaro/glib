@@ -223,13 +223,23 @@ socket_strerror (int err)
 #ifndef G_OS_WIN32
   return g_strerror (err);
 #else
-  static GStaticPrivate last_msg = G_STATIC_PRIVATE_INIT;
-  char *msg;
+  #define MAX_ERROR_MESSAGE_LENGTH 256
+
+  static GStaticPrivate msg_private = G_STATIC_PRIVATE_INIT;
+  char *buf, *msg;
+
+  buf = g_static_private_get (&msg_private);
+  if (!buf)
+    {
+      buf = g_new (gchar, MAX_ERROR_MESSAGE_LENGTH);
+      g_static_private_set (&msg_private, buf, g_free);
+    }
 
   msg = g_win32_error_message (err);
-  g_static_private_set (&last_msg, msg, g_free);
-
-  return msg;
+  strncpy (buf, msg, MAX_ERROR_MESSAGE_LENGTH);
+  buf[MAX_ERROR_MESSAGE_LENGTH - 1] = '\0';
+  g_free (msg);
+  return buf;
 #endif
 }
 
