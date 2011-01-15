@@ -33,7 +33,7 @@
 
 #include <glib/gtypes.h>
 
-#ifdef  __GNUC__
+#if defined (__GNUC__) && !defined (ANDROID)
 /* GCC does the right thing */
 # undef alloca
 # define alloca(size)   __builtin_alloca (size)
