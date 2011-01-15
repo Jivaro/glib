@@ -929,6 +929,9 @@ AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_blocks, struct statfs.f
 # struct statvfs.f_basetype is available on Solaris but not for Linux. 
 AC_CHECK_MEMBERS([struct statvfs.f_basetype],,, [#include <sys/statvfs.h>])
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff, struct tm.__tm_gmtoff],,,[#include <time.h>])
+# struct passwd.pw_gecos is not available on bionic for Android
+AC_CHECK_FUNCS(endpwent getpwent fgetpwent setpwent)
+AC_CHECK_MEMBERS([struct passwd.pw_gecos],,,[#includ <pwd.h>])
 
 # Checks for libcharset
 AM_LANGINFO_CODESET
