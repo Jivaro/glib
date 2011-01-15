@@ -933,7 +933,8 @@ AC_CHECK_MEMBERS([struct tm.tm_gmtoff, struct tm.__tm_gmtoff],,,[#include <time.
 # Checks for libcharset
 AM_LANGINFO_CODESET
 AC_CHECK_HEADERS([stddef.h stdlib.h string.h])
-AC_CHECK_FUNCS(setlocale)
+AC_CHECK_FUNCS(setlocale localeconv)
+AC_CHECK_MEMBERS([struct lconv.decimal_point],,, [#include <locale.h>])
 
 # check additional type sizes
 AC_CHECK_SIZEOF(size_t)
