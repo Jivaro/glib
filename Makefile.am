@@ -67,8 +67,7 @@ BUILT_EXTRA_DIST = 		\
 	README			\
 	INSTALL			\
 	ChangeLog		\
-	config.h.win32		\
-	gtk-doc.make
+	config.h.win32
 
 CONFIGURE_DEPENDENCIES = acglib.m4
 

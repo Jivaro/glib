@@ -166,8 +166,6 @@ extra_files =			\
 	version.xml.in		\
 	gvfs-overview.odg
 
-include $(top_srcdir)/gtk-doc.make
-
 EXTRA_DIST +=			\
 	version.xml.in
 

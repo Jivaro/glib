@@ -72,9 +72,6 @@ content_files =				\
 # Extra options to supply to gtkdoc-fixref
 FIXXREF_OPTIONS=
 
-# include common portion ...
-include $(top_srcdir)/gtk-doc.make
-
 # Other files to distribute
 EXTRA_DIST +=				\
 	file-name-encodings.png		\

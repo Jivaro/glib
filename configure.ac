@@ -2783,12 +2783,6 @@ if test $cross_compiling = yes; then
   fi
 fi
 
-dnl **************************
-dnl *** Checks for gtk-doc ***
-dnl **************************
-
-GTK_DOC_CHECK([1.15])
-
 AC_ARG_ENABLE(man,
               [AC_HELP_STRING([--enable-man],
                               [regenerate man pages from Docbook [default=no]])],enable_man=yes,

@@ -57,8 +57,6 @@ content_files = version.xml 		\
 # Extra options to supply to gtkdoc-fixref
 FIXXREF_OPTIONS=--extra-dir=$(srcdir)/../glib/html
 
-include $(top_srcdir)/gtk-doc.make
-
 # Other files to distribute
 EXTRA_DIST += 		\
 	gobject.cI	\
