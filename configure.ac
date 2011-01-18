@@ -1988,8 +1988,8 @@ if test x"$have_threads" != xno; then
     # One of them does for most gcc versions and some other platforms/compilers
     # too and could be considered as the canonical way to go. 
     case $host in
-      *-*-cygwin*|*-*-darwin*)
-         # skip cygwin and darwin -pthread or -pthreads test
+      *-*-cygwin*|*-*-darwin*|*-*-android*)
+         # skip cygwin, darwin and android -pthread or -pthreads test
          ;;
       *-solaris*)
         # These compiler/linker flags work with both Sun Studio and gcc
