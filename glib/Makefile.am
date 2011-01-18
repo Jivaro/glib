@@ -344,7 +344,13 @@ pcre_lib =
 pcre_inc =
 endif
 
-libglib_2_0_la_LIBADD = libcharset/libcharset.la $(printf_la) @GIO@ @GSPAWN@ @PLATFORMDEP@ @ICONV_LIBS@ @G_LIBS_EXTRA@ $(pcre_lib) $(GLIB_RT_LIBS)
+if USE_PROXY_LIBINTL
+proxy_libintl_lib = $(top_builddir)/proxy-libintl/libintl.la
+else
+proxy_libintl_lib =
+endif
+
+libglib_2_0_la_LIBADD = libcharset/libcharset.la $(printf_la) @GIO@ @GSPAWN@ @PLATFORMDEP@ @ICONV_LIBS@ @G_LIBS_EXTRA@ $(pcre_lib) $(proxy_libintl_lib) $(GLIB_RT_LIBS)
 libglib_2_0_la_DEPENDENCIES = libcharset/libcharset.la $(printf_la) @GIO@ @GSPAWN@ @PLATFORMDEP@ $(glib_win32_res) $(glib_def)
 
 libglib_2_0_la_LDFLAGS = $(GLIB_LINK_FLAGS) \

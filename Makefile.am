@@ -3,7 +3,13 @@ include $(top_srcdir)/Makefile.decl
 
 ACLOCAL_AMFLAGS = -I m4macros ${ACLOCAL_FLAGS}
 
-SUBDIRS = . m4macros glib gmodule gthread gobject gio tests po docs
+if USE_PROXY_LIBINTL
+MAYBE_PROXYLIBINTL = proxy-libintl
+else
+MAYBE_PROXYLIBINTL = po
+endif
+
+SUBDIRS = . $(MAYBE_PROXYLIBINTL) m4macros glib gmodule gthread gobject gio tests docs
 DIST_SUBDIRS = $(SUBDIRS) build
 
 bin_SCRIPTS = glib-gettextize

@@ -194,7 +194,7 @@ AM_CONDITIONAL(MS_LIB_AVAILABLE, [test x$ms_librarian = xyes])
 if test "$glib_native_win32" != yes; then
     # libtool option to control which symbols are exported
     # right now, symbols starting with _ are not exported
-    LIBTOOL_EXPORT_OPTIONS='-export-symbols-regex "^g.*"'
+    LIBTOOL_EXPORT_OPTIONS='-export-symbols-regex "(^g.*|^bind_textdomain_codeset$$|^bindtextdomain$$|^dcgettext$$|^dcngettext$$|^dgettext$$|^dngettext$$|^gettext$$|^ngettext$$|^textdomain$$)"'
 else
     # We currently use .def files on Windows
     LIBTOOL_EXPORT_OPTIONS=
@@ -234,6 +234,10 @@ AC_ARG_ENABLE(rebuilds,
               [AC_HELP_STRING([--disable-rebuilds],
                               [disable all source autogeneration rules])],,
               [enable_rebuilds=yes])
+AC_ARG_ENABLE(proxy_libintl,
+              [AC_HELP_STRING([--enable-proxy-libintl],
+                              [use built-in stub gettext impl instead of GNU gettext  [default=no]])],,
+              [enable_proxy_libintl=no])
 
 if test "x$enable_threads" != "xyes"; then
   enable_threads=no
@@ -464,18 +468,31 @@ dnl
 dnl gettext support
 dnl
 
-ALL_LINGUAS="`grep -v '^#' "$srcdir/po/LINGUAS" | tr '\n' ' '`"
-AC_SUBST([CONFIG_STATUS_DEPENDENCIES],['$(top_srcdir)/po/LINGUAS'])
-GLIB_GNU_GETTEXT
+AC_MSG_CHECKING([whether to use GNU gettext or internal proxy-libintl])
+AM_CONDITIONAL(USE_PROXY_LIBINTL, [test "x$enable_proxy_libintl" != "xno"])
+if test "x$enable_proxy_libintl" = "xno"; then
+  AC_MSG_RESULT([no])
+  ALL_LINGUAS="`grep -v '^#' "$srcdir/po/LINGUAS" | tr '\n' ' '`"
+  AC_SUBST([CONFIG_STATUS_DEPENDENCIES],['$(top_srcdir)/po/LINGUAS'])
+  GLIB_GNU_GETTEXT
 
-if test "$gt_cv_have_gettext" != "yes" ; then
-  AC_MSG_ERROR([
+  if test "$gt_cv_have_gettext" != "yes" ; then
+    AC_MSG_ERROR([
 *** You must have either have gettext support in your C library, or use the 
 *** GNU gettext library. (http://www.gnu.org/software/gettext/gettext.html
 ])
-fi
+  fi
 
-LIBS="$INTLLIBS $LIBS"
+  LIBS="$INTLLIBS $LIBS"
+else
+  AC_MSG_RESULT([yes])
+
+  libintl_h_INCLUDES='-I$(top_srcdir)/proxy-libintl'
+  AC_SUBST(libintl_h_INCLUDES)
+
+  INTLLIBS=""
+  AC_SUBST(INTLLIBS)
+fi
 
 GETTEXT_PACKAGE=glib20
 AC_SUBST(GETTEXT_PACKAGE)
@@ -3711,7 +3728,7 @@ AC_SUBST(config_h_INCLUDES)
 #   $(top_builddir)/glib: for glibconfig.h
 #   $(top_srcdir)/glib:   for glib.h
 #   $(top_srcdir):        for everything
-glib_INCLUDES='$(config_h_INCLUDES) -I$(top_builddir)/glib -I$(top_srcdir)/glib -I$(top_srcdir)'
+glib_INCLUDES='$(config_h_INCLUDES) $(libintl_h_INCLUDES) -I$(top_builddir)/glib -I$(top_srcdir)/glib -I$(top_srcdir)'
 AC_SUBST(glib_INCLUDES)
 
 # gthread:
@@ -3787,6 +3804,7 @@ gio/fam/Makefile
 gio/win32/Makefile
 gio/tests/Makefile
 po/Makefile.in
+proxy-libintl/Makefile
 docs/Makefile
 docs/reference/Makefile
 docs/reference/glib/Makefile
