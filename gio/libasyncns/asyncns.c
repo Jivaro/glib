@@ -598,7 +598,7 @@ static int handle_request(int out_fd, const packet_t *packet, size_t length) {
         case REQUEST_RES_QUERY:
         case REQUEST_RES_SEARCH: {
             int ret;
-            HEADER answer[BUFSIZE/sizeof(HEADER) + 1];
+            unsigned char answer[BUFSIZE + 1];
             const res_request_t *res_req = &packet->res_request;
             const char *dname;
 
@@ -608,11 +608,11 @@ static int handle_request(int out_fd, const packet_t *packet, size_t length) {
             dname = (const char *) req + sizeof(res_request_t);
 
             if (req->type == REQUEST_RES_QUERY)
-                ret = res_query(dname, res_req->class, res_req->type, (unsigned char *) answer, BUFSIZE);
+                ret = res_query(dname, res_req->class, res_req->type, answer, BUFSIZE);
             else
-                ret = res_search(dname, res_req->class, res_req->type, (unsigned char *) answer, BUFSIZE);
+                ret = res_search(dname, res_req->class, res_req->type, answer, BUFSIZE);
 
-            return send_res_reply(out_fd, req->id, (unsigned char *) answer, ret, errno, h_errno);
+            return send_res_reply(out_fd, req->id, answer, ret, errno, h_errno);
         }
 
         case REQUEST_TERMINATE:
@@ -690,7 +690,7 @@ static int process_worker(int in_fd, int out_fd) {
         goto fail;
 
 #ifdef PR_SET_PDEATHSIG
-    if (prctl(PR_SET_PDEATHSIG, SIGTERM) >= 0)
+    if (prctl(PR_SET_PDEATHSIG, SIGTERM, 0, 0, 0) >= 0)
         have_death_sig = 1;
 #endif
 

@@ -47,12 +47,87 @@
 #if defined(HAVE_ARPA_NAMESER_COMPAT_H) && !defined(GETSHORT)
 #include <arpa/nameser_compat.h>
 #endif
+
+/* We're supposed to define _GNU_SOURCE to get EAI_NODATA, but that
+ * won't actually work since <features.h> has already been included at
+ * this point. So we define __USE_GNU instead.
+ */
+#define __USE_GNU
+
 #include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <resolv.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+
+#ifndef C_IN
+#define C_IN 1
+#endif
+
+#ifndef T_SRV
+#define T_SRV 33
+#endif
+
+#ifndef NS_GET16
+#define NS_GET16(s, cp) do { \
+       register const u_char *t_cp = (const u_char *)(cp); \
+       (s) = ((u_int16_t)t_cp[0] << 8) \
+           | ((u_int16_t)t_cp[1]) \
+           ; \
+       (cp) += 2; \
+} while (0)
+#endif
+
+#ifndef NS_GET32
+#define NS_GET32(l, cp) do { \
+       register const u_char *t_cp = (const u_char *)(cp); \
+       (l) = ((u_int32_t)t_cp[0] << 24) \
+           | ((u_int32_t)t_cp[1] << 16) \
+           | ((u_int32_t)t_cp[2] << 8) \
+           | ((u_int32_t)t_cp[3]) \
+           ; \
+       (cp) += 4; \
+} while (0)
+#endif
+
+#ifndef NS_PUT16
+#define NS_PUT16(s, cp) do { \
+       register u_int16_t t_s = (u_int16_t)(s); \
+       register u_char *t_cp = (u_char *)(cp); \
+       *t_cp++ = t_s >> 8; \
+       *t_cp   = t_s; \
+       (cp) += 2; \
+} while (0)
+#endif
+
+#ifndef NS_PUT32
+#define NS_PUT32(l, cp) do { \
+       register u_int32_t t_l = (u_int32_t)(l); \
+       register u_char *t_cp = (u_char *)(cp); \
+       *t_cp++ = t_l >> 24; \
+       *t_cp++ = t_l >> 16; \
+       *t_cp++ = t_l >> 8; \
+       *t_cp   = t_l; \
+       (cp) += 4; \
+} while (0)
+#endif
+
+#ifndef GETSHORT
+#define GETSHORT NS_GET16
+#endif
+
+#ifndef GETLONG
+#define GETLONG NS_GET32
+#endif
+
+#ifndef PUTSHORT
+#define PUTSHORT NS_PUT16
+#endif
+
+#ifndef PUTLONG
+#define PUTLONG NS_PUT32
+#endif
 
 #ifndef T_SRV
 #define T_SRV 33

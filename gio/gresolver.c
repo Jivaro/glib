@@ -837,6 +837,20 @@ _g_resolver_name_from_nameinfo (GInetAddress  *address,
 }
 
 #if defined(G_OS_UNIX)
+#ifdef ANDROID
+# define SRV_HEADER_OFFSET(answer) (answer + (sizeof (guint16) * 6))
+# define SRV_ANSWER_QDCOUNT(answer) (ntohs (((guint16 *)answer)[2]))
+# define SRV_ANSWER_ANCOUNT(answer) (ntohs (((guint16 *)answer)[3]))
+# define SRV_ANSWER_NSCOUNT(answer) (ntohs (((guint16 *)answer)[4]))
+# define SRV_ANSWER_ARCOUNT(answer) (ntohs (((guint16 *)answer)[5]))
+#else
+# define SRV_HEADER_OFFSET(answer) (answer + sizeof (HEADER))
+# define SRV_ANSWER_QDCOUNT(answer) (ntohs (((HEADER *)answer)->qdcount))
+# define SRV_ANSWER_ANCOUNT(answer) (ntohs (((HEADER *)answer)->ancount))
+# define SRV_ANSWER_NSCOUNT(answer) (ntohs (((HEADER *)answer)->nscount))
+# define SRV_ANSWER_ARCOUNT(answer) (ntohs (((HEADER *)answer)->arcount))
+#endif
+
 /* Private method to process a res_query response into GSrvTargets */
 GList *
 _g_resolver_targets_from_res_query (const gchar      *rrname,
@@ -850,7 +864,6 @@ _g_resolver_targets_from_res_query (const gchar      *rrname,
   guchar *end, *p;
   guint16 type, qclass, rdlength, priority, weight, port;
   guint32 ttl;
-  HEADER *header;
   GSrvTarget *target;
   GList *targets;
 
@@ -881,12 +894,11 @@ _g_resolver_targets_from_res_query (const gchar      *rrname,
 
   targets = NULL;
 
-  header = (HEADER *)answer;
-  p = answer + sizeof (HEADER);
+  p = SRV_HEADER_OFFSET (answer);
   end = answer + len;
 
   /* Skip query */
-  count = ntohs (header->qdcount);
+  count = SRV_ANSWER_QDCOUNT (answer);
   while (count-- && p < end)
     {
       p += dn_expand (answer, end, p, namebuf, sizeof (namebuf));
@@ -894,7 +906,7 @@ _g_resolver_targets_from_res_query (const gchar      *rrname,
     }
 
   /* Read answers */
-  count = ntohs (header->ancount);
+  count = SRV_ANSWER_ANCOUNT (answer);
   while (count-- && p < end)
     {
       p += dn_expand (answer, end, p, namebuf, sizeof (namebuf));
