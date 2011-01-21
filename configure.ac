@@ -171,11 +171,24 @@ AC_TRY_CPP([
 
 AC_MSG_RESULT([$glib_have_carbon])
 
+AC_MSG_CHECKING([for PS3 GameOS])
+case "$host" in
+  *-*-gameos*)
+    glib_os_gameos=yes
+    glib_cv_stack_grows=no
+    ;;
+  *)
+    glib_os_gameos=no
+    ;;
+esac
+AC_MSG_RESULT([$glib_os_gameos])
+
 AM_CONDITIONAL(OS_WIN32, [test "$glib_native_win32" = "yes"])
 AM_CONDITIONAL(OS_WIN32_X64, [test "$LIB_EXE_MACHINE_FLAG" = "X64"])
 AM_CONDITIONAL(OS_UNIX, [test "$glib_native_win32" != "yes"])
 AM_CONDITIONAL(OS_LINUX, [test "$glib_os_linux" = "yes"])
 AM_CONDITIONAL(OS_CARBON, [test "$glib_have_carbon" = "yes"])
+AM_CONDITIONAL(OS_GAMEOS, [test "$glib_os_gameos" = "yes"])
 
 if test "$glib_native_win32" = "yes"; then
   AC_CHECK_TOOL(WINDRES, windres, no)
@@ -1064,7 +1077,7 @@ AC_CHECK_FUNCS(getprotobyname_r endservent)
 AC_CHECK_HEADERS([netdb.h wspiapi.h])
 
 # For gio/libasyncns
-if test $glib_native_win32 = no; then
+if test $glib_native_win32 = no && test $glib_os_gameos = no; then
   AC_CHECK_FUNCS(strndup setresuid setreuid)
   AC_CHECK_HEADERS(sys/prctl.h arpa/nameser_compat.h)
 
