@@ -131,7 +131,7 @@ static void
 g_thread_pool_queue_push_unlocked (GRealThreadPool *pool,
 				   gpointer         data)
 {
-  if (pool->sort_func) 
+  if (pool->sort_func && GPOINTER_TO_UINT (data) != 1) 
     g_async_queue_push_sorted_unlocked (pool->queue, 
 					data,
 					pool->sort_func, 
