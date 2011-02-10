@@ -488,7 +488,11 @@ g_stat (const gchar *filename,
       (!g_path_is_absolute (filename) || len > g_path_skip_root (filename) - filename))
     wfilename[len] = '\0';
 
+#if defined (_MSC_VER) && defined (_WIN64)
+  retval = _wstat64 (wfilename, buf);
+#else
   retval = _wstat (wfilename, buf);
+#endif
   save_errno = errno;
 
   g_free (wfilename);

@@ -27,7 +27,7 @@
 
 G_BEGIN_DECLS
 
-#if defined (_MSC_VER) && !defined(_WIN64)
+#if defined (_MSC_VER) && !defined (_WIN64)
 
 /* Make it clear that we mean the struct with 32-bit st_size and
  * 32-bit st_*time fields as that is how the 32-bit GLib DLL normally
@@ -45,6 +45,10 @@ G_BEGIN_DECLS
  */
 
 typedef struct _stat32 GStatBuf;
+
+#elif defined (_MSC_VER) && defined (_WIN64)
+
+typedef struct __stat64 GStatBuf;
 
 #else
 
