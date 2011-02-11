@@ -27,6 +27,10 @@
 typedef void* HMODULE;
 #endif
 
+#ifdef _MSC_VER
+#  define strdup(s) _strdup (s)
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 
