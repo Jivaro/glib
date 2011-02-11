@@ -576,7 +576,7 @@ g_thread_join_win32_impl (gpointer thread)
 }
 
 static guint64
-g_thread_gettime_impl (void)
+g_thread_gettime_real_impl (void)
 {
   guint64 v;
 
@@ -590,6 +590,8 @@ g_thread_gettime_impl (void)
 
   return v;
 }
+
+static guint64 (*g_thread_gettime_impl)(void) = g_thread_gettime_real_impl;
 
 static GThreadFunctions g_thread_functions_for_glib_use_default =
 {
