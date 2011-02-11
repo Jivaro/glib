@@ -265,7 +265,7 @@ g_pattern_spec_new (const gchar *pattern)
 
   /* canonicalize pattern and collect necessary stats */
   pspec = g_new (GPatternSpec, 1);
-  pspec->pattern_length = strlen (pattern);
+  pspec->pattern_length = (guint) strlen (pattern);
   pspec->min_length = 0;
   pspec->max_length = 0;
   pspec->pattern = g_new (gchar, pspec->pattern_length + 1);
@@ -410,7 +410,7 @@ g_pattern_match_string (GPatternSpec *pspec,
   g_return_val_if_fail (pspec != NULL, FALSE);
   g_return_val_if_fail (string != NULL, FALSE);
 
-  return g_pattern_match (pspec, strlen (string), string, NULL);
+  return g_pattern_match (pspec, (guint) strlen (string), string, NULL);
 }
 
 /**
@@ -435,7 +435,7 @@ g_pattern_match_simple (const gchar *pattern,
   g_return_val_if_fail (string != NULL, FALSE);
 
   pspec = g_pattern_spec_new (pattern);
-  ergo = g_pattern_match (pspec, strlen (string), string, NULL);
+  ergo = g_pattern_match (pspec, (guint) strlen (string), string, NULL);
   g_pattern_spec_free (pspec);
 
   return ergo;

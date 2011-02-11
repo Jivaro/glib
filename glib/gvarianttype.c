@@ -1330,7 +1330,7 @@ g_variant_type_new_tuple_slow (const GVariantType * const *items,
    * happen only in truly insane code, so it can be slow.
    */
   GString *string;
-  gsize i;
+  gint i;
 
   string = g_string_new ("(");
   for (i = 0; i < length; i++)
@@ -1355,7 +1355,7 @@ g_variant_type_new_tuple (const GVariantType * const *items,
 {
   char buffer[1024];
   gsize offset;
-  gsize i;
+  gint i;
 
   g_return_val_if_fail (length == 0 || items != NULL, NULL);
 

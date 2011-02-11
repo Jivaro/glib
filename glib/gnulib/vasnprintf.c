@@ -354,16 +354,16 @@ vasnprintf (char *resultbuf, size_t *lengthp, const char *format, va_list args)
 		switch (a.arg[dp->arg_index].type)
 		  {
 		  case TYPE_COUNT_SCHAR_POINTER:
-		    *a.arg[dp->arg_index].a.a_count_schar_pointer = length;
+		    *a.arg[dp->arg_index].a.a_count_schar_pointer = (signed char) length;
 		    break;
 		  case TYPE_COUNT_SHORT_POINTER:
-		    *a.arg[dp->arg_index].a.a_count_short_pointer = length;
+		    *a.arg[dp->arg_index].a.a_count_short_pointer = (short) length;
 		    break;
 		  case TYPE_COUNT_INT_POINTER:
-		    *a.arg[dp->arg_index].a.a_count_int_pointer = length;
+		    *a.arg[dp->arg_index].a.a_count_int_pointer = (int) length;
 		    break;
 		  case TYPE_COUNT_LONGINT_POINTER:
-		    *a.arg[dp->arg_index].a.a_count_longint_pointer = length;
+		    *a.arg[dp->arg_index].a.a_count_longint_pointer = (long int) length;
 		    break;
 #ifdef HAVE_LONG_LONG
 		  case TYPE_COUNT_LONGLONGINT_POINTER:
@@ -576,13 +576,13 @@ vasnprintf (char *resultbuf, size_t *lengthp, const char *format, va_list args)
 			tmp_length =
 			  (a.arg[dp->arg_index].a.a_wide_string == NULL
 			  ? 6 /* wcslen(L"(null)") */
-			   : local_wcslen (a.arg[dp->arg_index].a.a_wide_string)) 
+			   : (unsigned int) local_wcslen (a.arg[dp->arg_index].a.a_wide_string)) 
 			  * MB_CUR_MAX;
 		      else
 # endif
 			tmp_length = a.arg[dp->arg_index].a.a_string == NULL
 			  ? 6 /* strlen("(null)") */
-			  : strlen (a.arg[dp->arg_index].a.a_string);
+			  : (unsigned int) strlen (a.arg[dp->arg_index].a.a_string);
 		      break;
 
 		    case 'p':
@@ -1020,14 +1020,14 @@ vasnprintf (char *resultbuf, size_t *lengthp, const char *format, va_list args)
 		      }
 
 #if !HAVE_SNPRINTF
-		    if (count >= tmp_length)
+		    if (count >= (int) tmp_length)
 		      /* tmp_length was incorrectly calculated - fix the
 			 code above!  */
 		      abort ();
 #endif
 
 		    /* Make room for the result.  */
-		    if (count >= maxlen)
+		    if (count >= (int) maxlen)
 		      {
 			/* Need at least count bytes.  But allocate
 			   proportionally, to avoid looping eternally if

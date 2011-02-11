@@ -76,7 +76,7 @@ static const guint g_nprimes = sizeof (g_primes) / sizeof (g_primes[0]);
 guint
 g_spaced_primes_closest (guint num)
 {
-  gint i;
+  guint i;
 
   for (i = 0; i < g_nprimes; i++)
     if (g_primes[i] > num)

@@ -249,6 +249,9 @@ g_qsort_with_data (gconstpointer    pbase,
      of the array to sort, and END_PTR points at the very last element in
      the array (*not* one beyond it!). */
 
+#ifdef min
+#undef min
+#endif
 #define min(x, y) ((x) < (y) ? (x) : (y))
 
   {

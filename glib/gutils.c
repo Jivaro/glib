@@ -393,7 +393,7 @@ g_find_program_in_path (const gchar *program)
       strchr (last_dot, '\\') != NULL ||
       strchr (last_dot, '/') != NULL)
     {
-      const gint program_length = strlen (program);
+      const gsize program_length = strlen (program);
       gchar *pathext = g_build_path (";",
 				     ".exe;.cmd;.bat;.com",
 				     g_getenv ("PATHEXT"),
@@ -1208,7 +1208,7 @@ _g_getenv_nomalloc (const gchar *variable,
   const gchar *retval = getenv (variable);
   if (retval && retval[0])
     {
-      gint l = strlen (retval);
+      gsize l = strlen (retval);
       if (l < 1024)
         {
           strncpy (buffer, retval, l);
@@ -1504,7 +1504,7 @@ g_get_environ (void)
 #else
   gunichar2 *strings;
   gchar **result;
-  gint i, n;
+  gsize i, n;
 
   strings = GetEnvironmentStringsW ();
   for (n = 0; strings[n]; n += wcslen (strings + n) + 1);
@@ -2837,7 +2837,7 @@ get_module_share_dir (gconstpointer address)
 }
 
 G_CONST_RETURN gchar * G_CONST_RETURN *
-g_win32_get_system_data_dirs_for_module (void (*address_of_function)())
+g_win32_get_system_data_dirs_for_module (void (*address_of_function)(void))
 {
   GArray *data_dirs;
   HMODULE hmodule;
@@ -3682,7 +3682,7 @@ ensure_gettext_initialized(void)
       bindtextdomain (GETTEXT_PACKAGE, tmp);
       g_free (tmp);
 #else
-      bindtextdomain (GETTEXT_PACKAGE, GLIB_LOCALE_DIR);
+      (void) bindtextdomain (GETTEXT_PACKAGE, GLIB_LOCALE_DIR);
 #endif
 #    ifdef HAVE_BIND_TEXTDOMAIN_CODESET
       bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");

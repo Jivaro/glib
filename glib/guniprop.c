@@ -807,7 +807,7 @@ output_special_case (gchar *out_buffer,
 		     int    which)
 {
   const gchar *p = special_case_table + offset;
-  gint len;
+  gsize len;
 
   if (type != G_UNICODE_TITLECASE_LETTER)
     p = g_utf8_next_char (p);

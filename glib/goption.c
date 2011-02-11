@@ -680,7 +680,7 @@ group_list_has_visible_entires (GOptionContext *context,
 static gboolean
 context_has_h_entry (GOptionContext *context)
 {
-  gsize i;
+  gint i;
   GList *list;
 
   if (context->main_group)
@@ -1470,7 +1470,7 @@ parse_long_option (GOptionContext *context,
         }
       else
         {
-          gint len = strlen (group->entries[j].long_name);
+          gsize len = strlen (group->entries[j].long_name);
 
           if (strncmp (arg, group->entries[j].long_name, len) == 0 &&
               (arg[len] == '=' || arg[len] == 0))
@@ -1885,7 +1885,7 @@ g_option_context_parse (GOptionContext   *context,
                   gboolean *nulled_out = NULL;
                   gboolean has_h_entry = context_has_h_entry (context);
                   arg = (*argv)[i] + 1;
-                  arg_length = strlen (arg);
+                  arg_length = (gint) strlen (arg);
                   nulled_out = g_newa (gboolean, arg_length);
                   memset (nulled_out, 0, arg_length * sizeof (gboolean));
                   for (j = 0; j < arg_length; j++)

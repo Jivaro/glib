@@ -622,7 +622,7 @@ magazine_cache_trim (Allocator *allocator,
   /* trim magazine cache from tail */
   ChunkLink *current = magazine_chain_prev (allocator->magazines[ix]);
   ChunkLink *trash = NULL;
-  while (ABS (stamp - magazine_chain_uint_stamp (current)) >= allocator->config.working_set_msecs)
+  while ((gsize) ABS ((gssize) stamp - (gssize) magazine_chain_uint_stamp (current)) >= allocator->config.working_set_msecs)
     {
       /* unlink */
       ChunkLink *prev = magazine_chain_prev (current);
@@ -1039,7 +1039,7 @@ static gsize
 allocator_aligned_page_size (Allocator *allocator,
                              gsize      n_bytes)
 {
-  gsize val = 1 << g_bit_storage (n_bytes - 1);
+  gsize val = (gsize) (1 << g_bit_storage (n_bytes - 1));
   val = MAX (val, allocator->min_page_size);
   return val;
 }

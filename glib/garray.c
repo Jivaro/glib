@@ -140,7 +140,7 @@ struct _GRealArray
     g_array_elt_zero ((array), (array)->len, 1);			\
 }G_STMT_END
 
-static guint g_nearest_pow        (gint        num) G_GNUC_CONST;
+static guint g_nearest_pow        (guint       num) G_GNUC_CONST;
 static void  g_array_maybe_expand (GRealArray *array,
 				   gint        len);
 
@@ -664,7 +664,7 @@ g_array_sort_with_data (GArray           *farray,
  * such power does not fit in a guint
  */
 static guint
-g_nearest_pow (gint num)
+g_nearest_pow (guint num)
 {
   guint n = 1;
 
@@ -993,7 +993,7 @@ g_ptr_array_set_size  (GPtrArray *farray,
 
   g_return_if_fail (array);
 
-  if (length > array->len)
+  if (length > (gint) array->len)
     {
       int i;
       g_ptr_array_maybe_expand (array, (length - array->len));
@@ -1006,7 +1006,7 @@ g_ptr_array_set_size  (GPtrArray *farray,
       for (i = array->len; i < length; i++)
 	array->pdata[i] = NULL;
     }
-  else if (length < array->len)
+  else if (length < (gint) array->len)
     g_ptr_array_remove_range (farray, length, array->len - length);
 
   array->len = length;

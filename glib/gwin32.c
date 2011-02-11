@@ -177,7 +177,7 @@ g_win32_error_message (gint error)
 {
   gchar *retval;
   wchar_t *msg = NULL;
-  int nchars;
+  gsize nchars;
 
   FormatMessageW (FORMAT_MESSAGE_ALLOCATE_BUFFER
 		  |FORMAT_MESSAGE_IGNORE_INSERTS

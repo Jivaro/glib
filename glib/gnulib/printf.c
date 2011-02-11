@@ -99,7 +99,7 @@ int _g_gnulib_vfprintf (FILE *file, char const *format, va_list args)
   fwrite (result, 1, length, file);
   free (result);
   
-  return length;
+  return (int) length;
 }
 
 int _g_gnulib_vsprintf (char *string, char const *format, va_list args)
@@ -114,7 +114,7 @@ int _g_gnulib_vsprintf (char *string, char const *format, va_list args)
   memcpy (string, result, length + 1);
   free (result);
   
-  return length;  
+  return (int) length;  
 }
 
 int _g_gnulib_vsnprintf (char *string, size_t n, char const *format, va_list args)
@@ -134,7 +134,7 @@ int _g_gnulib_vsnprintf (char *string, size_t n, char const *format, va_list arg
 
   free (result);
   
-  return length;  
+  return (int) length;  
 }
 
 int _g_gnulib_vasprintf (char **result, char const *format, va_list args)
@@ -145,7 +145,7 @@ int _g_gnulib_vasprintf (char **result, char const *format, va_list args)
   if (*result == NULL) 
     return -1;
   
-  return length;  
+  return (int) length;  
 }
 
 

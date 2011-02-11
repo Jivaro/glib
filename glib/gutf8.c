@@ -447,11 +447,11 @@ get_alias_hash (void)
 		count++;
 	    }
 	  
-	  alias_array = g_renew (const char *, alias_array, count + 2);
+	  alias_array = g_renew (const char *, (gpointer)alias_array, count + 2);
 	  alias_array[count] = alias;
 	  alias_array[count + 1] = NULL;
 	  
-	  g_hash_table_insert (alias_hash, (char *)canonical, alias_array);
+	  g_hash_table_insert (alias_hash, (char *)canonical, (gpointer)alias_array);
 	}
     }
 
@@ -762,9 +762,9 @@ g_utf8_get_char_extended (const  gchar *p,
       return (gunichar)-1;
     }
 
-  if (G_UNLIKELY (max_len >= 0 && len > max_len))
+  if (G_UNLIKELY (max_len >= 0 && len > (guint) max_len))
     {
-      for (i = 1; i < max_len; i++)
+      for (i = 1; i < (guint) max_len; i++)
 	{
 	  if ((((guchar *)p)[i] & 0xc0) != 0x80)
 	    return (gunichar)-1;
@@ -1375,7 +1375,7 @@ g_utf16_to_ucs4 (const gunichar2  *str,
 
   if (items_written)
     /********** DIFFERENT for UTF8/UCS4 **********/
-    *items_written = (out - result) / sizeof (gunichar);
+    *items_written = (glong) ((out - result) / sizeof (gunichar));
 
  err_out:
   if (items_read)
@@ -1862,7 +1862,7 @@ _g_utf8_make_valid (const gchar *name)
 {
   GString *string;
   const gchar *remainder, *invalid;
-  gint remaining_bytes, valid_bytes;
+  gsize remaining_bytes, valid_bytes;
 
   g_return_val_if_fail (name != NULL, NULL);
 

@@ -782,14 +782,14 @@ static GVariantType *
 g_variant_make_tuple_type (GVariant * const *children,
                            gsize             n_children)
 {
-  const GVariantType **types;
+  GVariantType **types;
   GVariantType *type;
   gsize i;
 
-  types = g_new (const GVariantType *, n_children);
+  types = g_new (GVariantType *, n_children);
 
   for (i = 0; i < n_children; i++)
-    types[i] = g_variant_get_type (children[i]);
+    types[i] =  (GVariantType *)g_variant_get_type (children[i]);
 
   type = g_variant_type_new_tuple (types, n_children);
   g_free (types);
@@ -1341,7 +1341,7 @@ g_variant_new_strv (const gchar * const *strv,
                     gssize               length)
 {
   GVariant **strings;
-  gsize i;
+  gssize i;
 
   g_return_val_if_fail (length == 0 || strv != NULL, NULL);
 
@@ -1569,7 +1569,7 @@ g_variant_new_bytestring_array (const gchar * const *strv,
                                 gssize               length)
 {
   GVariant **strings;
-  gsize i;
+  gssize i;
 
   g_return_val_if_fail (length == 0 || strv != NULL, NULL);
 
@@ -2331,6 +2331,7 @@ g_variant_hash (gconstpointer value_)
     default:
       g_return_val_if_fail (!g_variant_is_container (value), 0);
       g_assert_not_reached ();
+      return 0;
     }
 }
 
@@ -2429,6 +2430,9 @@ g_variant_equal (gconstpointer one,
  *
  * Since: 2.26
  **/
+
+#define NEVER_REACHED (0)
+
 gint
 g_variant_compare (gconstpointer one,
                    gconstpointer two)
@@ -2501,6 +2505,7 @@ g_variant_compare (gconstpointer one,
     default:
       g_return_val_if_fail (!g_variant_is_container (a), 0);
       g_assert_not_reached ();
+      return 0;
     }
 }
 
@@ -3753,6 +3758,7 @@ g_variant_valist_new_nnp (const gchar **str,
 
     default:
       g_assert_not_reached ();
+      return NEVER_REACHED;
     }
 }
 
@@ -3783,7 +3789,7 @@ g_variant_valist_get_nnp (const gchar **str,
         if (g_variant_scan_convenience (str, &constant, &arrays) == 's')
           {
             if (constant)
-              return g_variant_get_strv (value, NULL);
+              return (gpointer)g_variant_get_strv (value, NULL);
             else
               return g_variant_dup_strv (value, NULL);
           }
@@ -3791,7 +3797,7 @@ g_variant_valist_get_nnp (const gchar **str,
         else if (arrays > 1)
           {
             if (constant)
-              return g_variant_get_bytestring_array (value, NULL);
+              return (gpointer)g_variant_get_bytestring_array (value, NULL);
             else
               return g_variant_dup_bytestring_array (value, NULL);
           }
@@ -3819,6 +3825,7 @@ g_variant_valist_get_nnp (const gchar **str,
 
     default:
       g_assert_not_reached ();
+      return NEVER_REACHED;
     }
 }
 
@@ -3901,6 +3908,7 @@ g_variant_valist_new_leaf (const gchar **str,
 
     default:
       g_assert_not_reached ();
+      return NEVER_REACHED;
     }
 }
 
@@ -4678,6 +4686,7 @@ g_variant_deep_copy (GVariant *value)
     }
 
   g_assert_not_reached ();
+  return NEVER_REACHED;
 }
 
 /**

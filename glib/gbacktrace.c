@@ -122,7 +122,7 @@ g_on_error_query (const gchar *prg_name)
   fflush (stdout);
 
   if (isatty(0) && isatty(1))
-    fgets (buf, 8, stdin);
+    (void) fgets (buf, 8, stdin);
   else
     strcpy (buf, "E\n");
 
@@ -233,9 +233,9 @@ stack_trace (char **args)
   pid = fork ();
   if (pid == 0)
     {
-      close (0); dup (in_fd[0]);   /* set the stdin to the in pipe */
-      close (1); dup (out_fd[1]);  /* set the stdout to the out pipe */
-      close (2); dup (out_fd[1]);  /* set the stderr to the out pipe */
+      close (0); (void) dup (in_fd[0]);   /* set the stdin to the in pipe */
+      close (1); (void) dup (out_fd[1]);  /* set the stdout to the out pipe */
+      close (2); (void) dup (out_fd[1]);  /* set the stderr to the out pipe */
 
       execvp (args[0], args);      /* exec gdb */
       perror ("exec failed");
@@ -250,9 +250,9 @@ stack_trace (char **args)
   FD_ZERO (&fdset);
   FD_SET (out_fd[0], &fdset);
 
-  write (in_fd[1], "backtrace\n", 10);
-  write (in_fd[1], "p x = 0\n", 8);
-  write (in_fd[1], "quit\n", 5);
+  (void) write (in_fd[1], "backtrace\n", 10);
+  (void) write (in_fd[1], "p x = 0\n", 8);
+  (void) write (in_fd[1], "quit\n", 5);
 
   idx = 0;
   state = 0;

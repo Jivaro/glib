@@ -117,6 +117,16 @@
  * appropriately-sized zero-filled region.
  */
 
+struct alignment_test
+{
+  char a;
+  union {
+    guint64 x;
+    void *y;
+    gdouble z;
+  } b;
+};
+
 /* < private >
  * g_variant_serialised_check:
  * @serialised: a #GVariantSerialised struct
@@ -146,15 +156,7 @@ g_variant_serialised_check (GVariantSerialised serialised)
    * 4-aligned case, we care about 2 bits, and in the 8-aligned case, we
    * care about 3 bits.
    */
-  alignment &= sizeof (struct {
-                         char a;
-                         union {
-                           guint64 x;
-                           void *y;
-                           gdouble z;
-                         } b;
-                       }
-                      ) - 9;
+  alignment &= sizeof (struct alignment_test) - 9;
 
   /* Some OSes (FreeBSD is a known example) have a malloc() that returns
    * unaligned memory if you request small sizes.  'malloc (1);', for
@@ -670,7 +672,7 @@ gvs_variable_sized_array_get_child (GVariantSerialised value,
                                      offset_size);
 
       g_variant_type_info_query (child.type_info, &alignment, NULL);
-      start += (-start) & alignment;
+      start += ~(start - 1) & alignment;
     }
   else
     start = 0;
@@ -705,7 +707,7 @@ gvs_variable_sized_array_needed_size (GVariantTypeInfo         *type_info,
     {
       GVariantSerialised child = { 0, };
 
-      offset += (-offset) & alignment;
+      offset += ~(offset - 1) & alignment;
       gvs_filler (&child, children[i]);
       offset += child.size;
     }
@@ -957,7 +959,7 @@ gvs_tuple_needed_size (GVariantTypeInfo         *type_info,
       member_info = g_variant_type_info_member_info (type_info, i);
       g_variant_type_info_query (member_info->type_info,
                                  &alignment, &fixed_size);
-      offset += (-offset) & alignment;
+      offset += ~(offset - 1) & alignment;
 
       if (fixed_size)
         offset += fixed_size;
@@ -1317,6 +1319,7 @@ g_variant_serialised_n_children (GVariantSerialised serialised)
 
                  )
   g_assert_not_reached ();
+  return 0;
 }
 
 /* < private >
@@ -1432,6 +1435,7 @@ g_variant_serialiser_needed_size (GVariantTypeInfo         *type_info,
 
                  )
   g_assert_not_reached ();
+  return 0;
 }
 
 /* Byteswapping {{{2 */

@@ -808,6 +808,11 @@ g_io_win32_prepare (GSource *source,
   return ((watch->condition & buffer_condition) == watch->condition);
 }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4715)
+#endif
+
 static gboolean
 g_io_win32_check (GSource *source)
 {
@@ -950,6 +955,10 @@ g_io_win32_check (GSource *source)
       abort ();
     }
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 static gboolean
 g_io_win32_dispatch (GSource     *source,

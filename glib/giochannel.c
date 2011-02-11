@@ -297,6 +297,8 @@ g_io_error_get_from_g_error (GIOStatus  status,
       default:
         g_assert_not_reached ();
     }
+
+  return G_IO_ERROR_UNKNOWN;
 }
 
 /**
@@ -901,7 +903,7 @@ g_io_channel_set_line_term (GIOChannel	*channel,
   if (line_term == NULL)
     length = 0;
   else if (length < 0)
-    length = strlen (line_term);
+    length = (gint) strlen (line_term);
 
   g_free (channel->line_term);
   channel->line_term = line_term ? g_memdup (line_term, length) : NULL;
@@ -2299,7 +2301,7 @@ g_io_channel_write_chars (GIOChannel   *channel,
 
       if (!channel->encoding)
         {
-          gssize write_this = MIN (space_in_buf, count - wrote_bytes);
+          gssize write_this = MIN ((gssize) space_in_buf, count - wrote_bytes);
 
           g_string_append_len (channel->write_buf, buf, write_this);
           buf += write_this;

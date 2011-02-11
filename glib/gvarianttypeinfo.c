@@ -336,7 +336,7 @@ static void
 tuple_info_free (GVariantTypeInfo *info)
 {
   TupleInfo *tuple_info;
-  gint i;
+  guint i;
 
   g_assert (info->container_class == TUPLE_INFO_CLASS);
   tuple_info = (TupleInfo *) info;
@@ -512,7 +512,7 @@ static gsize
 tuple_align (gsize offset,
              guint alignment)
 {
-  return offset + ((-offset) & alignment);
+  return offset + (~(offset - 1) & alignment);
 }
 
 /* This function is the heart of the algorithm for calculating 'i', 'a',

@@ -145,7 +145,7 @@ g_thread_pool_wait_for_new_pool (void)
 {
   GRealThreadPool *pool;
   gint local_wakeup_thread_serial;
-  guint local_max_unused_threads;
+  gint local_max_unused_threads;
   gint local_max_idle_time;
   gint last_wakeup_thread_serial;
   gboolean have_relayed_thread_marker = FALSE;
@@ -198,7 +198,8 @@ g_thread_pool_wait_for_new_pool (void)
 			    "waiting thread with lower serial.",
 			    g_thread_self ()));
 
-		g_async_queue_push (unused_thread_queue, wakeup_thread_marker);
+		g_async_queue_push (unused_thread_queue,
+				    (gpointer) wakeup_thread_marker);
 		have_relayed_thread_marker = TRUE;
 
 		/* If a wakeup marker has been relayed, this thread
@@ -798,7 +799,7 @@ g_thread_pool_free_internal (GRealThreadPool* pool)
 static void
 g_thread_pool_wakeup_and_stop_all (GRealThreadPool* pool)
 {
-  guint i;
+  gint i;
   
   g_return_if_fail (pool);
   g_return_if_fail (pool->running == FALSE);
@@ -838,7 +839,7 @@ g_thread_pool_set_max_unused_threads (gint max_threads)
 	  do
 	    {
 	      g_async_queue_push_unlocked (unused_thread_queue,
-					   wakeup_thread_marker);
+					   (gpointer) wakeup_thread_marker);
 	    }
 	  while (++max_threads);
 
@@ -973,7 +974,7 @@ g_thread_pool_set_max_idle_time (guint interval)
       do
 	{
 	  g_async_queue_push_unlocked (unused_thread_queue,
-				       wakeup_thread_marker);
+				       (gpointer) wakeup_thread_marker);
 	}
       while (--i);
 

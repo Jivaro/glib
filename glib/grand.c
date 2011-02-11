@@ -402,7 +402,7 @@ g_rand_set_seed_array (GRand* rand, const guint32 *seed, guint seed_length)
 	  rand->mt[0] = rand->mt[N-1];
 	  i=1;
 	}
-      if (j>=seed_length)
+      if ((guint)j>=seed_length)
 	j=0;
     }
   for (k=N-1; k; k--)

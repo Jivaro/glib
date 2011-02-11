@@ -473,7 +473,7 @@ g_stat (const gchar *filename,
   wchar_t *wfilename = g_utf8_to_utf16 (filename, -1, NULL, NULL, NULL);
   int retval;
   int save_errno;
-  int len;
+  gsize len;
 
   if (wfilename == NULL)
     {
@@ -485,7 +485,8 @@ g_stat (const gchar *filename,
   while (len > 0 && G_IS_DIR_SEPARATOR (wfilename[len-1]))
     len--;
   if (len > 0 &&
-      (!g_path_is_absolute (filename) || len > g_path_skip_root (filename) - filename))
+      (!g_path_is_absolute (filename) ||
+       len > (gsize) (g_path_skip_root (filename) - filename)))
     wfilename[len] = '\0';
 
 #if defined (_MSC_VER) && defined (_WIN64)

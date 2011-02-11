@@ -1198,7 +1198,7 @@ strdup_len (const gchar *string,
     {
       real_len = 0;
       
-      while (real_len < len && string[real_len])
+      while (real_len < (gsize) len && string[real_len])
 	real_len++;
     }
   
@@ -1785,7 +1785,7 @@ g_unescape_uri_string (const char *escaped,
     return NULL;
 
   if (len < 0)
-    len = strlen (escaped);
+    len = (int) strlen (escaped);
 
   result = g_malloc (len + 1);
   

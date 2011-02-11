@@ -734,7 +734,7 @@ unescape_gstring_inplace (GMarkupParseContext  *context,
         }
     }
 
-  g_assert (to - string->str <= string->len);
+  g_assert ((gsize) (to - string->str) <= string->len);
   if (to - string->str != string->len)
     g_string_truncate (string, to - string->str);
 

@@ -306,7 +306,7 @@ static gboolean
 token_stream_peek_string (TokenStream *stream,
                           const gchar *token)
 {
-  gint length = strlen (token);
+  gsize length = strlen (token);
 
   return token_stream_prepare (stream) &&
          stream->stream - stream->this == length &&
@@ -1881,37 +1881,37 @@ number_get_value (AST                 *ast,
     case 'n':
       if (abs_val - negative > G_MAXINT16)
         return number_overflow (ast, type, error);
-      return g_variant_new_int16 (negative ? -abs_val : abs_val);
+      return g_variant_new_int16 (negative ? -((gint64) abs_val) : abs_val);
 
     case 'q':
       if (negative || abs_val > G_MAXUINT16)
         return number_overflow (ast, type, error);
-      return g_variant_new_uint16 (negative ? -abs_val : abs_val);
+      return g_variant_new_uint16 (negative ? -((gint64) abs_val) : abs_val);
 
     case 'i':
       if (abs_val - negative > G_MAXINT32)
         return number_overflow (ast, type, error);
-      return g_variant_new_int32 (negative ? -abs_val : abs_val);
+      return g_variant_new_int32 (negative ? -((gint64) abs_val) : abs_val);
 
     case 'u':
       if (negative || abs_val > G_MAXUINT32)
         return number_overflow (ast, type, error);
-      return g_variant_new_uint32 (negative ? -abs_val : abs_val);
+      return g_variant_new_uint32 (negative ? -((gint64) abs_val) : abs_val);
 
     case 'x':
       if (abs_val - negative > G_MAXINT64)
         return number_overflow (ast, type, error);
-      return g_variant_new_int64 (negative ? -abs_val : abs_val);
+      return g_variant_new_int64 (negative ? -((gint64) abs_val) : abs_val);
 
     case 't':
       if (negative)
         return number_overflow (ast, type, error);
-      return g_variant_new_uint64 (negative ? -abs_val : abs_val);
+      return g_variant_new_uint64 (negative ? -((gint64) abs_val) : abs_val);
 
     case 'h':
       if (abs_val - negative > G_MAXINT32)
         return number_overflow (ast, type, error);
-      return g_variant_new_handle (negative ? -abs_val : abs_val);
+      return g_variant_new_handle (negative ? -((gint64) abs_val) : abs_val);
 
     default:
       return ast_type_error (ast, type, error);

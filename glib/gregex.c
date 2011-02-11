@@ -447,7 +447,7 @@ match_info_new (const GRegex *regex,
   GMatchInfo *match_info;
 
   if (string_len < 0)
-    string_len = strlen (string);
+    string_len = (gint) strlen (string);
 
   match_info = g_new0 (GMatchInfo, 1);
   match_info->regex = g_regex_ref ((GRegex *)regex);
@@ -2820,7 +2820,7 @@ g_regex_escape_string (const gchar *string,
   g_return_val_if_fail (string != NULL, NULL);
 
   if (length < 0)
-    length = strlen (string);
+    length = (gint) strlen (string);
 
   end = string + length;
   p = piece_start = string;

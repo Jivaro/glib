@@ -2794,7 +2794,7 @@ gboolean
 g_main_context_prepare (GMainContext *context,
 			gint         *priority)
 {
-  gint i;
+  guint i;
   gint n_ready = 0;
   gint current_priority = G_MAXINT;
   GSource *source;
@@ -3026,7 +3026,7 @@ g_main_context_check (GMainContext *context,
     {
 #ifndef G_OS_WIN32
       gchar a;
-      read (context->wake_up_pipe[0], &a, 1);
+      (void) read (context->wake_up_pipe[0], &a, 1);
 #endif
     }
   else
@@ -3870,7 +3870,7 @@ g_main_context_wakeup_unlocked (GMainContext *context)
     {
       context->poll_waiting = FALSE;
 #ifndef G_OS_WIN32
-      write (context->wake_up_pipe[1], "A", 1);
+      (void) write (context->wake_up_pipe[1], "A", 1);
 #else
       ReleaseSemaphore (context->wake_up_semaphore, 1, NULL);
 #endif
@@ -4582,7 +4582,7 @@ g_unix_signal_handler (int signum)
 	  /* Shouldn't happen */
 	  return;
 	}
-      write (unix_signal_wake_up_pipe[1], buf, 1);
+      (void) write (unix_signal_wake_up_pipe[1], buf, 1);
     }
   else
     {
@@ -4695,6 +4695,8 @@ unix_signal_helper_thread (gpointer data)
 	  _g_main_wake_up_all_contexts ();
 	}
     }
+
+  return NULL;
 }
 
 static void

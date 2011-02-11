@@ -224,7 +224,7 @@ g_file_test (const gchar *filename,
     {
       const gchar *lastdot = strrchr (filename, '.');
       const gchar *pathext = NULL, *p;
-      int extlen;
+      gsize extlen;
 
       if (lastdot == NULL)
         break;
@@ -933,7 +933,7 @@ write_to_temp_file (const gchar  *contents,
 
       n_written = fwrite (contents, 1, length, file);
 
-      if (n_written < length)
+      if (n_written < (gsize) length)
 	{
 	  save_errno = errno;
       
@@ -1407,7 +1407,7 @@ g_build_path_va (const gchar  *separator,
 		 gchar       **str_array)
 {
   GString *result;
-  gint separator_len = strlen (separator);
+  gsize separator_len = strlen (separator);
   gboolean is_first = TRUE;
   gboolean have_leading = FALSE;
   const gchar *single_element = NULL;

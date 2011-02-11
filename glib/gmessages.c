@@ -137,7 +137,7 @@ static void
 write_string (int          fd,
 	      const gchar *string)
 {
-  write (fd, string, strlen (string));
+  (void) write (fd, string, (unsigned int) strlen (string));
 }
 
 static void

@@ -1453,7 +1453,7 @@ win32_strftime_helper (const GDate     *d,
   systemtime.wMilliseconds = 0;
   
   lcid = GetThreadLocale ();
-  result = g_array_sized_new (FALSE, FALSE, sizeof (wchar_t), MAX (128, strlen (format) * 2));
+  result = g_array_sized_new (FALSE, FALSE, sizeof (wchar_t), (guint) MAX (128, strlen (format) * 2));
 
   p = format;
   while (*p)
@@ -1744,9 +1744,9 @@ win32_strftime_helper (const GDate     *d,
 	      if (n == TIME_ZONE_ID_UNKNOWN)
 		;
 	      else if (n == TIME_ZONE_ID_STANDARD)
-		g_array_append_vals (result, tzinfo.StandardName, wcslen (tzinfo.StandardName));
+		g_array_append_vals (result, tzinfo.StandardName, (guint) wcslen (tzinfo.StandardName));
 	      else if (n == TIME_ZONE_ID_DAYLIGHT)
-		g_array_append_vals (result, tzinfo.DaylightName, wcslen (tzinfo.DaylightName));
+		g_array_append_vals (result, tzinfo.DaylightName, (guint) wcslen (tzinfo.DaylightName));
 	      break;
 	    case '%':
 	      g_array_append_vals (result, L"%", 1);
@@ -1779,7 +1779,7 @@ win32_strftime_helper (const GDate     *d,
       return 0;
     }
   
-  if (slen <= convlen)
+  if (slen <= (gsize) convlen)
     {
       /* Ensure only whole characters are copied into the buffer. */
       gchar *end = g_utf8_find_prev_char (convbuf, convbuf + slen);

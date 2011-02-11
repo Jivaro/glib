@@ -243,7 +243,7 @@ poll_rest (gboolean  poll_msgs,
 	{
 	  /* Remove the handle that fired */
 	  int i;
-	  if (ready < nhandles - 1)
+	  if (ready < (guint) nhandles - 1)
 	    for (i = ready - WAIT_OBJECT_0 + 1; i < nhandles; i++)
 	      handles[i-1] = handles[i];
 	  nhandles--;

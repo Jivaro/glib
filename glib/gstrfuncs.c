@@ -431,7 +431,7 @@ g_ascii_strtod (const gchar *nptr,
   gdouble val;
   struct lconv *locale_data;
   const char *decimal_point;
-  int decimal_point_len;
+  gsize decimal_point_len;
   const char *p, *decimal_point_pos;
   const char *end = NULL; /* Silence gcc */
   int strtod_errno;
@@ -625,9 +625,9 @@ g_ascii_formatd (gchar       *buffer,
 {
   struct lconv *locale_data;
   const char *decimal_point;
-  int decimal_point_len;
+  gsize decimal_point_len;
   gchar *p;
-  int rest_len;
+  gsize rest_len;
   gchar format_char;
 
   g_return_val_if_fail (buffer != NULL, NULL);
@@ -860,7 +860,7 @@ g_ascii_strtoull (const gchar *nptr,
   result = g_parse_long_long (nptr, (const gchar **) endptr, base, &negative);
 
   /* Return the result of the appropriate sign.  */
-  return negative ? -result : result;
+  return negative ? -((gint64) result) : result;
 }
 
 /**
@@ -2767,7 +2767,7 @@ g_strstr_len (const gchar *haystack,
       if (needle_len == 0)
         return (gchar *)haystack;
 
-      if (haystack_len < needle_len)
+      if ((gsize) haystack_len < needle_len)
         return NULL;
 
       end = haystack + haystack_len - needle_len;
@@ -2907,8 +2907,7 @@ gboolean
 g_str_has_suffix (const gchar  *str,
                   const gchar  *suffix)
 {
-  int str_len;
-  int suffix_len;
+  gsize str_len, suffix_len;
 
   g_return_val_if_fail (str != NULL, FALSE);
   g_return_val_if_fail (suffix != NULL, FALSE);
@@ -2937,8 +2936,7 @@ gboolean
 g_str_has_prefix (const gchar  *str,
                   const gchar  *prefix)
 {
-  int str_len;
-  int prefix_len;
+  gsize str_len, prefix_len;
 
   g_return_val_if_fail (str != NULL, FALSE);
   g_return_val_if_fail (prefix != NULL, FALSE);

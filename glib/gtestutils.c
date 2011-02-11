@@ -1312,7 +1312,7 @@ static int
 g_test_run_suite_internal (GTestSuite *suite,
                            const char *path)
 {
-  guint n_bad = 0, l;
+  gsize n_bad = 0, l;
   gchar *rest, *old_name = test_run_name;
   GSList *slist, *reversed;
 
@@ -1322,13 +1322,13 @@ g_test_run_suite_internal (GTestSuite *suite,
     path++;
   l = strlen (path);
   rest = strchr (path, '/');
-  l = rest ? MIN (l, rest - path) : l;
+  l = rest ? MIN (l, (gsize) (rest - path)) : l;
   test_run_name = suite->name[0] == 0 ? g_strdup (test_run_name) : g_strconcat (old_name, "/", suite->name, NULL);
   reversed = g_slist_reverse (g_slist_copy (suite->cases));
   for (slist = reversed; slist; slist = slist->next)
     {
       GTestCase *tc = slist->data;
-      guint n = l ? strlen (tc->name) : 0;
+      gsize n = l ? strlen (tc->name) : 0;
       if (l == n && strncmp (path, tc->name, n) == 0)
         {
           if (!test_case_run (tc))
@@ -1340,7 +1340,7 @@ g_test_run_suite_internal (GTestSuite *suite,
   for (slist = reversed; slist; slist = slist->next)
     {
       GTestSuite *ts = slist->data;
-      guint n = l ? strlen (ts->name) : 0;
+      gsize n = l ? strlen (ts->name) : 0;
       if (l == n && strncmp (path, ts->name, n) == 0)
         n_bad += g_test_run_suite_internal (ts, rest ? rest : "");
     }
@@ -1381,7 +1381,7 @@ g_test_run_suite (GTestSuite *suite)
   while (test_paths)
     {
       const char *rest, *path = test_paths->data;
-      guint l, n = strlen (suite->name);
+      gsize l, n = strlen (suite->name);
       test_paths = g_slist_delete_link (test_paths, test_paths);
       while (path[0] == '/')
         path++;
@@ -1393,7 +1393,7 @@ g_test_run_suite (GTestSuite *suite)
       /* regular suite, match path */
       rest = strchr (path, '/');
       l = strlen (path);
-      l = rest ? MIN (l, rest - path) : l;
+      l = rest ? MIN (l, (gsize) (rest - path)) : l;
       if ((!l || l == n) && strncmp (path, suite->name, n) == 0)
         n_bad += g_test_run_suite_internal (suite, rest ? rest : "");
     }
@@ -1689,7 +1689,7 @@ g_string_must_read (GString *gstring,
 static inline void
 g_string_write_out (GString *gstring,
                     int      outfd,
-                    int     *stringpos)
+                    gsize   *stringpos)
 {
   if (*stringpos < gstring->len)
     {
@@ -1816,7 +1816,8 @@ g_test_trap_fork (guint64        usec_timeout,
       GString *sout = g_string_new (NULL);
       GString *serr = g_string_new (NULL);
       guint64 sstamp;
-      int soutpos = 0, serrpos = 0, wr, need_wait = TRUE;
+      gsize soutpos = 0, serrpos = 0;
+      int wr, need_wait = TRUE;
       test_run_forks++;
       close (stdout_pipe[1]);
       close (stderr_pipe[1]);
@@ -2031,7 +2032,7 @@ g_test_log_dump (GTestLogMsg *msg,
   gstring_append_int (gstring, 0);      /* reserved */
   for (ui = 0; ui < msg->n_strings; ui++)
     {
-      guint l = strlen (msg->strings[ui]);
+      gsize l = strlen (msg->strings[ui]);
       gstring_append_int (gstring, l);
       g_string_append_len (gstring, msg->strings[ui], l);
     }
