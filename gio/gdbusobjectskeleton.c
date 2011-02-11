@@ -85,41 +85,41 @@ g_dbus_object_skeleton_finalize (GObject *_object)
 }
 
 static void
-g_dbus_object_skeleton_get_property (GObject    *_object,
+g_dbus_object_skeleton_get_property (GObject    *object,
                                      guint       prop_id,
                                      GValue     *value,
                                      GParamSpec *pspec)
 {
-  GDBusObjectSkeleton *object = G_DBUS_OBJECT_SKELETON (_object);
+  GDBusObjectSkeleton *self = G_DBUS_OBJECT_SKELETON (object);
 
   switch (prop_id)
     {
     case PROP_OBJECT_PATH:
-      g_value_take_string (value, object->priv->object_path);
+      g_value_take_string (value, self->priv->object_path);
       break;
 
     default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (_object, prop_id, pspec);
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
     }
 }
 
 static void
-g_dbus_object_skeleton_set_property (GObject       *_object,
+g_dbus_object_skeleton_set_property (GObject       *object,
                                      guint          prop_id,
                                      const GValue  *value,
                                      GParamSpec    *pspec)
 {
-  GDBusObjectSkeleton *object = G_DBUS_OBJECT_SKELETON (_object);
+  GDBusObjectSkeleton *self = G_DBUS_OBJECT_SKELETON (object);
 
   switch (prop_id)
     {
     case PROP_OBJECT_PATH:
-      g_dbus_object_skeleton_set_object_path (object, g_value_get_string (value));
+      g_dbus_object_skeleton_set_object_path (self, g_value_get_string (value));
       break;
 
     default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (_object, prop_id, pspec);
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
     }
 }

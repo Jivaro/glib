@@ -757,7 +757,7 @@ g_memory_output_stream_seek (GSeekable    *seekable,
       return FALSE;
     }
 
-  if (absolute > priv->len)
+  if ((gsize) absolute > priv->len)
     {
       g_set_error_literal (error,
                            G_IO_ERROR,

@@ -82,10 +82,6 @@ struct _GCredentials
   struct ucred native;
 #elif defined(__FreeBSD__)
   struct cmsgcred native;
-#else
-#ifdef __GNUC__
-#warning Please add GCredentials support for your OS
-#endif
 #endif
 };
 

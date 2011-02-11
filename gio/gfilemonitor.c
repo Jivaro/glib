@@ -698,7 +698,7 @@ g_file_monitor_emit_event (GFileMonitor      *monitor,
       if (limiter)
 	{
 	  since_last = time_difference (limiter->last_sent_change_time, time_now);
-	  if (since_last < monitor->priv->rate_limit_msec)
+	  if ((gssize) since_last < (gssize) monitor->priv->rate_limit_msec)
 	    {
 	      /* We ignore this change, but arm a timer so that we can fire it later if we
 		 don't get any other events (that kill this timeout) */

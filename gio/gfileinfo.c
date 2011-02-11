@@ -313,7 +313,7 @@ static void
 g_file_info_finalize (GObject *object)
 {
   GFileInfo *info;
-  int i;
+  guint i;
   GFileAttribute *attrs;
 
   info = G_FILE_INFO (object);
@@ -370,7 +370,7 @@ g_file_info_copy_into (GFileInfo *src_info,
                        GFileInfo *dest_info)
 {
   GFileAttribute *source, *dest;
-  int i;
+  guint i;
 
   g_return_if_fail (G_IS_FILE_INFO (src_info));
   g_return_if_fail (G_IS_FILE_INFO (dest_info));
@@ -433,7 +433,7 @@ g_file_info_set_attribute_mask (GFileInfo             *info,
 				GFileAttributeMatcher *mask)
 {
   GFileAttribute *attr;
-  int i;
+  guint i;
 
   g_return_if_fail (G_IS_FILE_INFO (info));
 
@@ -485,7 +485,7 @@ void
 g_file_info_clear_status (GFileInfo  *info)
 {
   GFileAttribute *attrs;
-  int i;
+  guint i;
 
   g_return_if_fail (G_IS_FILE_INFO (info));
 
@@ -494,7 +494,7 @@ g_file_info_clear_status (GFileInfo  *info)
     attrs[i].value.status = G_FILE_ATTRIBUTE_STATUS_UNSET;
 }
 
-static int
+static guint
 g_file_info_find_place (GFileInfo  *info,
 			guint32     attribute)
 {
@@ -530,7 +530,7 @@ g_file_info_find_value (GFileInfo *info,
 			guint32    attr_id)
 {
   GFileAttribute *attrs;
-  int i;
+  guint i;
 
   i = g_file_info_find_place (info, attr_id);
   attrs = (GFileAttribute *)info->attributes->data;
@@ -593,7 +593,7 @@ g_file_info_has_namespace (GFileInfo  *info,
 {
   GFileAttribute *attrs;
   guint32 ns_id;
-  int i;
+  guint i;
 
   g_return_val_if_fail (G_IS_FILE_INFO (info), FALSE);
   g_return_val_if_fail (name_space != NULL, FALSE);
@@ -629,7 +629,7 @@ g_file_info_list_attributes (GFileInfo  *info,
   GFileAttribute *attrs;
   guint32 attribute;
   guint32 ns_id = (name_space) ? lookup_namespace (name_space) : 0;
-  int i;
+  guint i;
 
   g_return_val_if_fail (G_IS_FILE_INFO (info), NULL);
 
@@ -687,7 +687,7 @@ g_file_info_remove_attribute (GFileInfo  *info,
 {
   guint32 attr_id;
   GFileAttribute *attrs;
-  int i;
+  guint i;
 
   g_return_if_fail (G_IS_FILE_INFO (info));
   g_return_if_fail (attribute != NULL && *attribute != '\0');
@@ -1063,7 +1063,7 @@ g_file_info_create_value (GFileInfo *info,
 			  guint32 attr_id)
 {
   GFileAttribute *attrs;
-  int i;
+  guint i;
 
   if (info->mask != NO_ATTRIBUTE_MASK &&
       !_g_file_attribute_matcher_matches_id (info->mask, attr_id))
@@ -2111,7 +2111,7 @@ matcher_add (GFileAttributeMatcher *matcher,
              guint                  mask)
 {
   SubMatcher *sub_matchers;
-  int i;
+  guint i;
   SubMatcher s;
 
   for (i = 0; i < ON_STACK_MATCHERS; i++)
@@ -2316,7 +2316,7 @@ matcher_matches_id (GFileAttributeMatcher *matcher,
                     guint32                id)
 {
   SubMatcher *sub_matchers;
-  int i;
+  guint i;
 
   for (i = 0; i < ON_STACK_MATCHERS; i++)
     {
@@ -2403,7 +2403,7 @@ g_file_attribute_matcher_enumerate_namespace (GFileAttributeMatcher *matcher,
 {
   SubMatcher *sub_matchers;
   int ns_id;
-  int i;
+  guint i;
 
   g_return_val_if_fail (ns != NULL && *ns != '\0', FALSE);
 
@@ -2450,7 +2450,7 @@ g_file_attribute_matcher_enumerate_namespace (GFileAttributeMatcher *matcher,
 const char *
 g_file_attribute_matcher_enumerate_next (GFileAttributeMatcher *matcher)
 {
-  int i;
+  guint i;
   SubMatcher *sub_matcher;
 
   /* We return a NULL matcher for an empty match string, so handle this */

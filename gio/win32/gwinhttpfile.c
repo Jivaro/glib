@@ -304,7 +304,7 @@ static const char *
 match_prefix (const char *path,
               const char *prefix)
 {
-  int prefix_len;
+  gsize prefix_len;
 
   prefix_len = strlen (prefix);
   if (strncmp (path, prefix, prefix_len) != 0)
@@ -400,7 +400,7 @@ g_winhttp_file_resolve_relative_path (GFile      *file,
   child->url.lpszUserName = g_memdup (winhttp_file->url.lpszUserName, (winhttp_file->url.dwUserNameLength+1)*2);
   child->url.lpszPassword = g_memdup (winhttp_file->url.lpszPassword, (winhttp_file->url.dwPasswordLength+1)*2);
   child->url.lpszUrlPath = wnew_path;
-  child->url.dwUrlPathLength = wcslen (wnew_path);
+  child->url.dwUrlPathLength = (DWORD) wcslen (wnew_path);
   child->url.lpszExtraInfo = NULL;
   child->url.dwExtraInfoLength = 0;
 

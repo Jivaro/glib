@@ -187,7 +187,9 @@ static void
 g_unix_credentials_message_serialize (GSocketControlMessage *_message,
                                       gpointer               data)
 {
-  GUnixCredentialsMessage *message = G_UNIX_CREDENTIALS_MESSAGE (_message);
+#if defined(__linux__) || defined(__FreeBSD__)
+    GUnixCredentialsMessage *message = G_UNIX_CREDENTIALS_MESSAGE (_message);
+#endif
 #ifdef __linux__
   memcpy (data,
           g_credentials_get_native (message->priv->credentials,

@@ -320,7 +320,7 @@ static gchar *
 hexencode (const gchar *str,
            gssize       len)
 {
-  guint n;
+  gssize n;
   GString *s;
 
   if (len == -1)

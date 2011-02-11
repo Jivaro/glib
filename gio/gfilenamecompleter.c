@@ -352,7 +352,7 @@ init_completion (GFilenameCompleter *completer,
   GFile *file, *parent;
   char *basename;
   char *t;
-  int len;
+  gsize len;
 
   *basename_out = NULL;
   

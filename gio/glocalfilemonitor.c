@@ -76,7 +76,7 @@ g_local_file_monitor_constructor (GType                  type,
   GLocalFileMonitor *local_monitor;
   const gchar *filename = NULL;
   GFileMonitorFlags flags = 0;
-  gint i;
+  guint i;
   
   klass = G_LOCAL_FILE_MONITOR_CLASS (g_type_class_peek (G_TYPE_LOCAL_FILE_MONITOR));
   parent_class = G_OBJECT_CLASS (g_type_class_peek_parent (klass));

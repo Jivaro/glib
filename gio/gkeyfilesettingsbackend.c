@@ -122,7 +122,7 @@ convert_path (GKeyfileSettingsBackend  *kfsb,
               gchar                   **group,
               gchar                   **basename)
 {
-  gint key_len = strlen (key);
+  gssize key_len = strlen (key);
   gint i;
 
   if (key_len < kfsb->prefix_len ||
@@ -642,12 +642,12 @@ g_keyfile_settings_backend_new (const gchar *filename,
   kfsb->file_monitor = g_file_monitor_file (kfsb->file, 0, NULL, NULL);
   kfsb->dir_monitor = g_file_monitor_file (kfsb->dir, 0, NULL, NULL);
 
-  kfsb->prefix_len = strlen (root_path);
+  kfsb->prefix_len = (gint) strlen (root_path);
   kfsb->prefix = g_strdup (root_path);
 
   if (root_group)
     {
-      kfsb->root_group_len = strlen (root_group);
+      kfsb->root_group_len = (gint) strlen (root_group);
       kfsb->root_group = g_strdup (root_group);
     }
 

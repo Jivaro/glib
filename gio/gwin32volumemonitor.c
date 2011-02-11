@@ -168,15 +168,16 @@ get_volumes (GVolumeMonitor *volume_monitor)
 static GList *
 get_connected_drives (GVolumeMonitor *volume_monitor)
 {
+  GList *list = NULL;
+
+#if 0
   GWin32VolumeMonitor *monitor;
   HANDLE  find_handle;
   BOOL    found;
   wchar_t wc_name[MAX_PATH+1];
-  GList *list = NULL;
   
   monitor = G_WIN32_VOLUME_MONITOR (volume_monitor);
 
-#if 0
   find_handle = FindFirstVolumeW (wc_name, MAX_PATH);
   found = (find_handle != INVALID_HANDLE_VALUE);
   while (found)

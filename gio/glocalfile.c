@@ -515,7 +515,7 @@ static const char *
 match_prefix (const char *path, 
               const char *prefix)
 {
-  int prefix_len;
+  gsize prefix_len;
 
   prefix_len = strlen (prefix);
   if (strncmp (path, prefix, prefix_len) != 0)
@@ -613,7 +613,7 @@ g_local_file_get_child_for_display_name (GFile        *file,
   return new_file;
 }
 
-#ifdef USE_STATFS
+#if defined (USE_STATFS) && !defined (HAVE_STRUCT_STATFS_F_FSTYPENAME)
 static const char *
 get_fs_type (long f_type)
 {
@@ -850,7 +850,7 @@ is_xp_or_later (void)
 static wchar_t *
 get_volume_for_path (const char *path)
 {
-  long len;
+  gsize len;
   wchar_t *wpath;
   wchar_t *result;
 

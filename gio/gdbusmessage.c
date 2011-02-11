@@ -2112,7 +2112,7 @@ append_value_to_blob (GVariant             *value,
           const gchar *signature;
           child = g_variant_get_child_value (value, 0);
           signature = g_variant_get_type_string (child);
-          g_data_output_stream_put_byte (dos, strlen (signature), NULL, NULL);
+          g_data_output_stream_put_byte (dos, (guchar) strlen (signature), NULL, NULL);
           g_data_output_stream_put_string (dos, signature, NULL, NULL);
           g_data_output_stream_put_byte (dos, '\0', NULL, NULL);
           if (!append_value_to_blob (child,
@@ -3252,6 +3252,8 @@ g_dbus_message_copy (GDBusMessage  *message,
   while (g_hash_table_iter_next (&iter, &header_key, (gpointer) &header_value))
     g_hash_table_insert (ret->headers, header_key, g_variant_ref (header_value));
 
+#ifdef G_OS_UNIX
  out:
+#endif
   return ret;
 }

@@ -218,12 +218,12 @@ g_dbus_object_manager_client_finalize (GObject *object)
 }
 
 static void
-g_dbus_object_manager_client_get_property (GObject    *_object,
+g_dbus_object_manager_client_get_property (GObject    *object,
                                     guint       prop_id,
                                     GValue     *value,
                                     GParamSpec *pspec)
 {
-  GDBusObjectManagerClient *manager = G_DBUS_OBJECT_MANAGER_CLIENT (_object);
+  GDBusObjectManagerClient *manager = G_DBUS_OBJECT_MANAGER_CLIENT (object);
 
   switch (prop_id)
     {
@@ -248,18 +248,18 @@ g_dbus_object_manager_client_get_property (GObject    *_object,
       break;
 
     default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (_object, prop_id, pspec);
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
     }
 }
 
 static void
-g_dbus_object_manager_client_set_property (GObject       *_object,
+g_dbus_object_manager_client_set_property (GObject       *object,
                                     guint          prop_id,
                                     const GValue  *value,
                                     GParamSpec    *pspec)
 {
-  GDBusObjectManagerClient *manager = G_DBUS_OBJECT_MANAGER_CLIENT (_object);
+  GDBusObjectManagerClient *manager = G_DBUS_OBJECT_MANAGER_CLIENT (object);
 
   switch (prop_id)
     {
@@ -305,7 +305,7 @@ g_dbus_object_manager_client_set_property (GObject       *_object,
       break;
 
     default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (_object, prop_id, pspec);
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
     }
 }
@@ -1036,7 +1036,7 @@ signal_cb (GDBusConnection *connection,
               g_object_unref (interface);
             }
           g_variant_unref (changed_properties);
-          g_free (invalidated_properties);
+          g_free ((gpointer) invalidated_properties);
         }
     }
   else
@@ -1600,7 +1600,7 @@ on_control_proxy_g_signal (GDBusProxy   *proxy,
                      &object_path,
                      &ifaces);
       remove_interfaces (manager, object_path, ifaces);
-      g_free (ifaces);
+      g_free ((gpointer) ifaces);
     }
 }
 

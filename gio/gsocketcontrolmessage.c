@@ -176,7 +176,7 @@ g_socket_control_message_deserialize (int      level,
   GSocketControlMessage *message;
   GType *message_types;
   guint n_message_types;
-  int i;
+  guint i;
 #ifndef G_OS_WIN32
   volatile GType a_type;
 #endif

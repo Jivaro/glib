@@ -242,7 +242,7 @@ static const char *
 match_prefix (const char *path, 
               const char *prefix)
 {
-  int prefix_len;
+  gsize prefix_len;
 
   prefix_len = strlen (prefix);
   if (strncmp (path, prefix, prefix_len) != 0)
@@ -487,7 +487,7 @@ unescape_string (const gchar *escaped_string,
     }
   
   *out = '\0';
-  g_warn_if_fail (out - result <= strlen (escaped_string));
+  g_warn_if_fail ((gsize) (out - result) <= strlen (escaped_string));
   return result;
 }
 

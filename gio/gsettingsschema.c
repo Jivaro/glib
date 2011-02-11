@@ -148,13 +148,13 @@ ensure_schema_lists (void)
 
       ptr = g_new (const gchar *, g_hash_table_size (single) + 1);
       non_relocatable_schema_list = ptr;
-      g_hash_table_foreach_steal (single, steal_item, &ptr);
+      g_hash_table_foreach_steal (single, steal_item, (gpointer) &ptr);
       g_hash_table_unref (single);
       *ptr = NULL;
 
       ptr = g_new (const gchar *, g_hash_table_size (reloc) + 1);
       relocatable_schema_list = ptr;
-      g_hash_table_foreach_steal (reloc, steal_item, &ptr);
+      g_hash_table_foreach_steal (reloc, steal_item, (gpointer) &ptr);
       g_hash_table_unref (reloc);
       *ptr = NULL;
 

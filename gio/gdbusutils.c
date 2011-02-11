@@ -122,7 +122,7 @@ is_valid_name (const gchar *start,
 gboolean
 g_dbus_is_name (const gchar *string)
 {
-  guint len;
+  gsize len;
   gboolean ret;
   const gchar *s;
 
@@ -171,7 +171,7 @@ gboolean
 g_dbus_is_unique_name (const gchar *string)
 {
   gboolean ret;
-  guint len;
+  gsize len;
 
   g_return_val_if_fail (string != NULL, FALSE);
 
@@ -243,7 +243,7 @@ g_dbus_is_member_name (const gchar *string)
 gboolean
 g_dbus_is_interface_name (const gchar *string)
 {
-  guint len;
+  gsize len;
   gboolean ret;
   const gchar *s;
 

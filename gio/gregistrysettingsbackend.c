@@ -1155,7 +1155,7 @@ registry_cache_destroy_tree (GNode            *node,
 
   if (item->subscription_count > 0)
     {
-	  gint i;
+	  guint i;
       /* There must be some watches active if this node is a watch point */
       g_warn_if_fail (self->cache_nodes->len > 1);
 
@@ -1366,7 +1366,7 @@ typedef struct
 static gboolean
 watch_handler (RegistryEvent *event)
 {
-  gint i;
+  guint i;
   trace ("Watch handler: got event in %s, items %i.\n", event->prefix, event->items->len);
 
   /* GSettings requires us to NULL-terminate the array. */
@@ -1395,7 +1395,7 @@ _free_watch (WatchThreadState *self,
   HANDLE  cond;
   gchar  *prefix;
 
-  g_return_if_fail (index > 0 && index < self->events->len);
+  g_return_if_fail (index > 0 && (guint) index < self->events->len);
 
   cond       = g_ptr_array_index (self->events,      index);
   hpath      = g_ptr_array_index (self->handles,     index);
@@ -1467,7 +1467,7 @@ watch_thread_handle_message (WatchThreadState *self)
         {
           GNode             *cache_node;
           RegistryCacheItem *cache_item;
-          gint               i;
+          guint              i;
 
           for (i=1; i<self->prefixes->len; i++)
             if (strcmp (g_ptr_array_index (self->prefixes, i),
@@ -1487,7 +1487,7 @@ watch_thread_handle_message (WatchThreadState *self)
 
           cache_node = g_ptr_array_index (self->cache_nodes, i);
 
-          trace ("watch thread: unsubscribe: freeing node %x, prefix %s, index %i\n",
+          trace ("watch thread: unsubscribe: freeing node %x, prefix %s, index %u\n",
                  (guint)cache_node, self->message.watch.prefix, i);
           if (cache_node != NULL)
             {
@@ -1510,7 +1510,7 @@ watch_thread_handle_message (WatchThreadState *self)
 
       case WATCH_THREAD_STOP:
         {
-          gint i;
+          guint i;
 
           /* Free any remaining cache and watch handles */
           for (i=1; i<self->events->len; i++)

@@ -2333,7 +2333,7 @@ g_settings_list_children (GSettings *settings)
 
       if (g_str_has_suffix (key, "/"))
         {
-          gint length = strlen (key);
+          gsize length = strlen (key);
 
           strv[j] = g_memdup (key, length);
           strv[j][length - 1] = '\0';

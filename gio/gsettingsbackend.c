@@ -702,7 +702,7 @@ g_settings_backend_changed_tree (GSettingsBackend *backend,
                                  path, keys, origin_tag);
 
   g_free (path);
-  g_free (keys);
+  g_free ((gchar **)keys);
 }
 
 /*< private >

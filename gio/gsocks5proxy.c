@@ -192,9 +192,9 @@ set_auth_msg (guint8	  *msg,
 	      const gchar *password,
 	      GError **error)
 {
-  gint len = 0;
-  gint ulen = 0; /* username length */
-  gint plen = 0; /* Password length */
+  gsize len = 0;
+  gsize ulen = 0; /* username length */
+  gsize plen = 0; /* Password length */
 
   if (username)
     ulen = strlen (username);

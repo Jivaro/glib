@@ -662,10 +662,10 @@ g_buffered_input_stream_real_fill (GBufferedInputStream  *stream,
   in_buffer = priv->end - priv->pos;
 
   /* Never fill more than can fit in the buffer */
-  count = MIN (count, priv->len - in_buffer);
+  count = MIN ((gsize) count, priv->len - in_buffer);
 
   /* If requested length does not fit at end, compact */
-  if (priv->len - priv->end < count)
+  if (priv->len - priv->end < (gsize) count)
     compact_buffer (stream);
 
   base_stream = G_FILTER_INPUT_STREAM (stream)->base_stream;
@@ -981,10 +981,10 @@ g_buffered_input_stream_real_fill_async (GBufferedInputStream *stream,
   in_buffer = priv->end - priv->pos;
 
   /* Never fill more than can fit in the buffer */
-  count = MIN (count, priv->len - in_buffer);
+  count = MIN ((gsize) count, priv->len - in_buffer);
 
   /* If requested length does not fit at end, compact */
-  if (priv->len - priv->end < count)
+  if (priv->len - priv->end < (gsize) count)
     compact_buffer (stream);
 
   simple = g_simple_async_result_new (G_OBJECT (stream),
@@ -1092,7 +1092,7 @@ read_fill_buffer_callback (GObject      *source_object,
   if (nread > 0)
     {
       available = priv->end - priv->pos;
-      data->count = MIN (data->count, available);
+      data->count = MIN (data->count, (gssize) available);
 
       memcpy ((char *)data->buffer + data->bytes_read, (char *)priv->buffer + priv->pos, data->count);
       data->bytes_read += data->count;
@@ -1274,7 +1274,7 @@ skip_fill_buffer_callback (GObject      *source_object,
   if (nread > 0)
     {
       available = priv->end - priv->pos;
-      data->count = MIN (data->count, available);
+      data->count = MIN (data->count, (gssize) available);
 
       data->bytes_skipped += data->count;
       priv->pos += data->count;

@@ -85,7 +85,7 @@ g_zlib_compressor_set_gzheader (GZlibCompressor *compressor)
 
   filename = g_file_info_get_name (compressor->file_info);
   compressor->gzheader.name = (Bytef *) filename;
-  compressor->gzheader.name_max = filename ? strlen (filename) + 1 : 0;
+  compressor->gzheader.name_max = filename ? (uInt) strlen (filename) + 1 : 0;
 
   compressor->gzheader.time =
       (uLong) g_file_info_get_attribute_uint64 (compressor->file_info,

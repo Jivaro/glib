@@ -1085,8 +1085,10 @@ write_message_continue_writing (MessageToWriteData *data)
                                    write_message_async_cb,
                                    data);
     }
+#ifdef G_OS_UNIX
  out:
   ;
+#endif
 }
 
 /* called in private thread shared by all GDBusConnection instances (without write-lock held) */

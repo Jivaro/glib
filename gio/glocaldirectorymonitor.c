@@ -94,7 +94,7 @@ g_local_directory_monitor_constructor (GType                  type,
   GLocalDirectoryMonitor *local_monitor;
   GFileMonitorFlags  flags = 0;
   const gchar *dirname = NULL;
-  gint i;
+  guint i;
   
   klass = G_LOCAL_DIRECTORY_MONITOR_CLASS (g_type_class_peek (G_TYPE_LOCAL_DIRECTORY_MONITOR));
   parent_class = G_OBJECT_CLASS (g_type_class_peek_parent (klass));

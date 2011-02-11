@@ -205,7 +205,7 @@ g_buffered_output_stream_set_buffer_size (GBufferedOutputStream *stream,
 
   if (priv->buffer)
     {
-      size = MAX (size, priv->pos);
+      size = MAX ((goffset) size, priv->pos);
 
       buffer = g_malloc (size);
       memcpy (buffer, priv->buffer, priv->pos);
@@ -665,7 +665,7 @@ g_buffered_output_stream_write_finish (GOutputStream        *stream,
 
   /* Now do the real copying of data to the buffer */
   count = priv->len - priv->pos; 
-  count = MIN (wdata->count, count);
+  count = MIN ((gssize) wdata->count, count);
 
   memcpy (priv->buffer + priv->pos, wdata->buffer, count);
   

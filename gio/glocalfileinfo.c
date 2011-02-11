@@ -1446,7 +1446,7 @@ _g_local_file_info_get (const char             *basename,
 #else
   {
     wchar_t *wpath = g_utf8_to_utf16 (path, -1, NULL, NULL, error);
-    int len;
+    gsize len;
 
     if (wpath == NULL)
       {
@@ -1458,7 +1458,8 @@ _g_local_file_info_get (const char             *basename,
     while (len > 0 && G_IS_DIR_SEPARATOR (wpath[len-1]))
       len--;
     if (len > 0 &&
-        (!g_path_is_absolute (path) || len > g_path_skip_root (path) - path))
+        (!g_path_is_absolute (path) ||
+         len > (gsize) (g_path_skip_root (path) - path)))
       wpath[len] = '\0';
 
     res = _wstati64 (wpath, &statbuf);

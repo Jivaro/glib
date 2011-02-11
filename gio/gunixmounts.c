@@ -56,8 +56,9 @@
 #include "glibintl.h"
 #include "gthemedicon.h"
 
-
+#ifdef HAVE_MNTENT_H
 static const char *_resolve_dev_root (void);
+#endif
 
 /**
  * SECTION:gunixmounts
@@ -998,6 +999,8 @@ _g_get_unix_mount_points (void)
     mib[1] = KERN_USERMOUNT;
     sysctl (mib, 2, &usermnt, &len, NULL, 0);
   }
+#else
+  len = 0;
 #endif
 #endif
   
@@ -2010,7 +2013,7 @@ g_unix_mount_point_guess_can_eject (GUnixMountPoint *mount_point)
   return FALSE;
 }
 
-
+#ifdef HAVE_MNTENT_H
 /* borrowed from gtk/gtkfilesystemunix.c in GTK+ on 02/23/2006 */
 static void
 _canonicalize_filename (gchar *filename)
@@ -2117,7 +2120,6 @@ _resolve_symlink (const char *file)
   return f;
 }
 
-#ifdef HAVE_MNTENT_H
 static const char *
 _resolve_dev_root (void)
 {

@@ -6614,7 +6614,7 @@ g_file_replace_contents (GFile             *file,
 {
   GFileOutputStream *out;
   gsize pos, remainder;
-  gssize res;
+  gssize res = 0;
   gboolean ret;
 
   g_return_val_if_fail (G_IS_FILE (file), FALSE);

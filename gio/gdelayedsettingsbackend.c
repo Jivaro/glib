@@ -392,7 +392,7 @@ delayed_backend_path_writable_changed (GObject          *target,
                                               state.keys[i]))
           g_tree_remove (delayed->priv->delayed, state.keys[i]);
 
-      g_free (state.keys);
+      g_free ((gpointer) state.keys);
 
       last_one = g_tree_nnodes (delayed->priv->delayed) == 0;
     }
