@@ -59,7 +59,7 @@ show_nodes (GType        type,
 	    const gchar *indent)
 {
   GType   *children;
-  guint i;
+  gsize i;
   
   if (!type)
     return;

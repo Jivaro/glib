@@ -159,7 +159,7 @@
  */
 #define STRUCT_ALIGNMENT (2 * sizeof (gsize))
 #define ALIGN_STRUCT(offset) \
-      ((offset + (STRUCT_ALIGNMENT - 1)) & -STRUCT_ALIGNMENT)
+      ((offset + (STRUCT_ALIGNMENT - 1)) & ~(STRUCT_ALIGNMENT - 1))
 
 
 /* --- typedefs --- */
@@ -546,9 +546,9 @@ lookup_iface_entry_I (volatile IFaceEntries *entries,
 		      TypeNode *iface_node)
 {
   guint8 *offsets;
-  guint offset_index;
+  gsize offset_index;
   IFaceEntry *check;
-  int index;
+  gsize index;
   IFaceEntry *entry;
 
   if (entries == NULL)
@@ -664,7 +664,7 @@ type_descriptive_name_I (GType type)
     {
       TypeNode *node = lookup_type_node_I (type);
       
-      return node ? NODE_NAME (node) : "<unknown>";
+      return node ? (gchar *) NODE_NAME (node) : "<unknown>";
     }
   else
     return "<invalid>";
@@ -1051,7 +1051,7 @@ type_data_make_W (TypeNode              *node,
 {
   TypeData *data;
   GTypeValueTable *vtable = NULL;
-  guint vtable_size = 0;
+  gsize vtable_size = 0;
   
   g_assert (node->data == NULL && info != NULL);
   
@@ -1256,7 +1256,7 @@ iface_node_has_available_offset_L (TypeNode *iface_node,
   if (offsets == NULL)
     return TRUE;
 
-  if (G_ATOMIC_ARRAY_DATA_SIZE (offsets) <= offset)
+  if (G_ATOMIC_ARRAY_DATA_SIZE (offsets) <= (gsize) offset)
     return TRUE;
 
   if (offsets[offset] == 0 ||
@@ -1335,8 +1335,7 @@ type_node_add_iface_entry_W (TypeNode   *node,
   IFaceEntries *entries;
   IFaceEntry *entry;
   TypeNode *iface_node;
-  guint i, j;
-  int num_entries;
+  guint i, j, num_entries;
 
   g_assert (node->is_instantiatable);
 
@@ -1842,7 +1841,8 @@ g_type_create_instance (GType type)
   TypeNode *node;
   GTypeInstance *instance;
   GTypeClass *class;
-  guint i, total_size;
+  gsize total_size;
+  guint i;
   
   node = lookup_type_node_I (type);
   if (!node || !node->is_instantiatable)

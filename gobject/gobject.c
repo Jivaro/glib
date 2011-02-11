@@ -562,7 +562,7 @@ g_object_class_install_properties (GObjectClass  *oclass,
                                    GParamSpec   **pspecs)
 {
   GType oclass_type, parent_type;
-  gint i;
+  guint i;
 
   g_return_if_fail (G_IS_OBJECT_CLASS (oclass));
   g_return_if_fail (n_pspecs > 1);
@@ -1178,7 +1178,7 @@ object_set_property (GObject             *object,
   GObjectClass *class = g_type_class_peek (pspec->owner_type);
   guint param_id = PARAM_SPEC_PARAM_ID (pspec);
   GParamSpec *redirect;
-  static gchar* enable_diagnostic = NULL;
+  static const gchar* enable_diagnostic = NULL;
 
   if (class == NULL)
     {
