@@ -497,7 +497,7 @@ g_io_channel_new_file (const gchar *filename,
         return NULL;
     }
 
-  switch (mode_num)
+  switch ((int) mode_num)
     {
       case MODE_R:
         flags = O_RDONLY;
@@ -549,7 +549,7 @@ g_io_channel_new_file (const gchar *filename,
   channel->is_seekable = S_ISREG (buffer.st_mode) || S_ISCHR (buffer.st_mode)
                          || S_ISBLK (buffer.st_mode);
 
-  switch (mode_num)
+  switch ((int) mode_num)
     {
       case MODE_R:
         channel->is_readable = TRUE;
