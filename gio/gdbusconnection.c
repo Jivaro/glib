@@ -1364,11 +1364,20 @@ g_dbus_connection_close_sync (GDBusConnection     *connection,
                               GError             **error)
 {
   gboolean ret;
+  GDBusWorker *worker;
 
   g_return_val_if_fail (G_IS_DBUS_CONNECTION (connection), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   ret = FALSE;
+
+  CONNECTION_LOCK (connection);
+  worker = connection->worker;
+  connection->worker = NULL;
+  CONNECTION_UNLOCK (connection);
+
+  if (worker != NULL)
+    _g_dbus_worker_stop_sync (worker);
 
   CONNECTION_LOCK (connection);
   if (!connection->closed)
@@ -1385,6 +1394,11 @@ g_dbus_connection_close_sync (GDBusConnection     *connection,
                            G_IO_ERROR,
                            G_IO_ERROR_CLOSED,
                            _("The connection is closed"));
+    }
+  if (alive_connections != NULL)
+    {
+      gboolean found = g_hash_table_remove (alive_connections, connection);
+      g_warn_if_fail (found);
     }
   CONNECTION_UNLOCK (connection);
 

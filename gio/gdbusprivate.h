@@ -68,6 +68,9 @@ void         _g_dbus_worker_send_message (GDBusWorker    *worker,
 /* can be called from any thread */
 void         _g_dbus_worker_stop         (GDBusWorker    *worker);
 
+/* can be called from any thread (except the worker thread) */
+void         _g_dbus_worker_stop_sync    (GDBusWorker    *worker);
+
 /* can be called from any thread */
 void         _g_dbus_worker_unfreeze     (GDBusWorker    *worker);
 

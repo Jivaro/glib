@@ -444,6 +444,10 @@ struct GDBusWorker
   guint64                             write_num_messages_written;
   GList                              *write_pending_flushes;
   gboolean                            flush_pending;
+
+  GMutex                             *io_pending_lock;
+  GCond                              *io_pending_cond;
+  gint                                io_pending_count;
 };
 
 /* ---------------------------------------------------------------------------------------------------- */
@@ -499,10 +503,32 @@ _g_dbus_worker_unref (GDBusWorker *worker)
       g_queue_foreach (worker->write_queue, (GFunc) message_to_write_data_free, NULL);
       g_queue_free (worker->write_queue);
 
+      g_mutex_free (worker->io_pending_lock);
+      g_cond_free (worker->io_pending_cond);
+      g_assert_cmpint (worker->io_pending_count, ==, 0);
+
       g_free (worker->read_buffer);
 
       g_free (worker);
     }
+}
+
+static void
+_g_dbus_worker_begin_io_operation (GDBusWorker *worker)
+{
+  g_mutex_lock (worker->io_pending_lock);
+  worker->io_pending_count++;
+  g_mutex_unlock (worker->io_pending_lock);
+}
+
+static void
+_g_dbus_worker_end_io_operation (GDBusWorker *worker)
+{
+  g_mutex_lock (worker->io_pending_lock);
+  worker->io_pending_count--;
+  if (worker->io_pending_count == 0)
+    g_cond_broadcast (worker->io_pending_cond);
+  g_mutex_unlock (worker->io_pending_lock);
 }
 
 static void
@@ -607,6 +633,8 @@ _g_dbus_worker_do_read_cb (GInputStream  *input_stream,
   gssize bytes_read;
 
   g_mutex_lock (worker->read_lock);
+
+  _g_dbus_worker_end_io_operation (worker);
 
   /* If already stopped, don't even process the reply */
   if (worker->stopped)
@@ -823,6 +851,8 @@ _g_dbus_worker_do_read_cb (GInputStream  *input_stream,
 static void
 _g_dbus_worker_do_read_unlocked (GDBusWorker *worker)
 {
+  _g_dbus_worker_begin_io_operation (worker);
+
   /* if bytes_wanted is zero, it means start reading a message */
   if (worker->read_buffer_bytes_wanted == 0)
     {
@@ -910,6 +940,8 @@ write_message_async_cb (GObject      *source_object,
   gssize bytes_written;
   GError *error;
 
+  _g_dbus_worker_end_io_operation (data->worker);
+
   /* Note: we can't access data->simple after calling g_async_result_complete () because the
    * callback can free @data and we're not completing in idle. So use a copy of the pointer.
    */
@@ -952,6 +984,7 @@ on_socket_ready (GSocket      *socket,
                  gpointer      user_data)
 {
   MessageToWriteData *data = user_data;
+  _g_dbus_worker_end_io_operation (data->worker);
   write_message_continue_writing (data);
   return FALSE; /* remove source */
 }
@@ -1028,6 +1061,7 @@ write_message_continue_writing (MessageToWriteData *data)
           if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_WOULD_BLOCK))
             {
               GSource *source;
+              _g_dbus_worker_begin_io_operation (data->worker);
               source = g_socket_create_source (data->worker->socket,
                                                G_IO_OUT | G_IO_HUP | G_IO_ERR,
                                                data->worker->cancellable);
@@ -1077,6 +1111,7 @@ write_message_continue_writing (MessageToWriteData *data)
         }
 #endif
 
+      _g_dbus_worker_begin_io_operation (data->worker);
       g_output_stream_write_async (ostream,
                                    (const gchar *) data->blob + data->total_written,
                                    data->blob_size - data->total_written,
@@ -1458,6 +1493,10 @@ _g_dbus_worker_new (GIOStream                              *stream,
   worker->write_lock = g_mutex_new ();
   worker->write_queue = g_queue_new ();
 
+  worker->io_pending_lock = g_mutex_new ();
+  worker->io_pending_cond = g_cond_new ();
+  worker->io_pending_count = 0;
+
   if (G_IS_SOCKET_CONNECTION (worker->stream))
     worker->socket = g_socket_connection_get_socket (G_SOCKET_CONNECTION (worker->stream));
 
@@ -1477,6 +1516,25 @@ _g_dbus_worker_stop (GDBusWorker *worker)
 {
   worker->stopped = TRUE;
   g_cancellable_cancel (worker->cancellable);
+  _g_dbus_worker_unref (worker);
+}
+
+/* ---------------------------------------------------------------------------------------------------- */
+
+/* can be called from any thread (except the worker thread) - blocks
+ * calling thread until worker has been completely stopped
+ */
+void
+_g_dbus_worker_stop_sync (GDBusWorker *worker)
+{
+  worker->stopped = TRUE;
+  g_cancellable_cancel (worker->cancellable);
+
+  g_mutex_lock (worker->io_pending_lock);
+  while (worker->io_pending_count != 0)
+    g_cond_wait (worker->io_pending_cond, worker->io_pending_lock);
+  g_mutex_unlock (worker->io_pending_lock);
+
   _g_dbus_worker_unref (worker);
 }
 
