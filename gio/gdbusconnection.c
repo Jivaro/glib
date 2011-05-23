@@ -487,7 +487,10 @@ g_dbus_connection_dispose (GObject *object)
       _g_dbus_worker_stop (connection->worker);
       connection->worker = NULL;
       if (alive_connections != NULL)
-        g_warn_if_fail (g_hash_table_remove (alive_connections, connection));
+        {
+          gboolean found = g_hash_table_remove (alive_connections, connection);
+          g_warn_if_fail (found);
+        }
     }
   else
     {
