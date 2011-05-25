@@ -4,7 +4,13 @@
 ## Process this file with automake to produce Makefile.in
 include $(top_srcdir)/Makefile.decl
 
-SUBDIRS = . tests
+if ENABLE_TESTS
+MAYBE_TESTS = tests
+else
+MAYBE_TESTS =
+endif
+
+SUBDIRS = . $(MAYBE_TESTS)
 
 CLEANFILES=
 

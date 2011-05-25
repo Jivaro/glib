@@ -243,6 +243,11 @@ AC_ARG_ENABLE(threads,
                               [turn on basic thread support [default=yes]
 ([=no] will override --with-threads)])],,
               [enable_threads=yes])
+AC_ARG_ENABLE(tests,
+              [AC_HELP_STRING([--enable-tests],
+                              [enable tests [default=yes]])],,
+              [enable_tests=yes])
+AM_CONDITIONAL(ENABLE_TESTS, [test x$enable_tests = xyes])
 AC_ARG_ENABLE(rebuilds,
               [AC_HELP_STRING([--disable-rebuilds],
                               [disable all source autogeneration rules])],,

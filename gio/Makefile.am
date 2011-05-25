@@ -295,7 +295,9 @@ giowin32include_HEADERS = \
 
 endif
 
+if ENABLE_TESTS
 SUBDIRS += tests
+endif
 
 libgio_2_0_la_SOURCES =		\
 	gio.c			\

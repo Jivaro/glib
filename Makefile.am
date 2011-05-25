@@ -9,7 +9,13 @@ else
 MAYBE_PROXYLIBINTL = po
 endif
 
-SUBDIRS = . $(MAYBE_PROXYLIBINTL) m4macros glib gmodule gthread gobject gio tests docs
+if ENABLE_TESTS
+MAYBE_TESTS = tests
+else
+MAYBE_TESTS =
+endif
+
+SUBDIRS = . $(MAYBE_PROXYLIBINTL) m4macros glib gmodule gthread gobject gio $(MAYBE_TESTS) docs
 DIST_SUBDIRS = $(SUBDIRS) build
 
 bin_SCRIPTS = glib-gettextize
