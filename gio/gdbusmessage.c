@@ -1676,8 +1676,6 @@ parse_value_from_blob (GMemoryBuffer          *buf,
           guint32 array_len;
           goffset offset;
           goffset target;
-          const GVariantType *element_type;
-          GVariantBuilder builder;
 
           array_len = g_memory_buffer_read_uint32 (buf, &local_error);
           if (local_error != NULL)
@@ -1702,44 +1700,67 @@ parse_value_from_blob (GMemoryBuffer          *buf,
               goto fail;
             }
 
-          g_variant_builder_init (&builder, type);
-          element_type = g_variant_type_element (type);
-
-          if (array_len == 0)
+          if (type_string[1] == 'y' && array_len > 0)
             {
-              GVariant *item;
-              item = parse_value_from_blob (buf,
-                                            element_type,
-                                            TRUE,
-                                            indent + 2,
-                                            NULL);
-              g_assert (item == NULL);
+              gpointer data;
+
+              if (buf->pos > buf->valid_len - array_len)
+                {
+                  g_set_error (&local_error,
+                               G_IO_ERROR,
+                               G_IO_ERROR_INVALID_ARGUMENT,
+                               g_dgettext (GETTEXT_PACKAGE, "Encountered truncated array data."));
+                  goto fail;
+                }
+
+              data = g_memdup (buf->data + buf->pos, array_len);
+              buf->pos += array_len;
+
+              ret = g_variant_new_from_data (type, data, array_len, TRUE, g_free, data);
             }
           else
             {
-              /* TODO: optimize array of primitive types */
-              offset = buf->pos;
-              target = offset + array_len;
-              while (offset < target)
+              const GVariantType *element_type;
+              GVariantBuilder builder;
+
+              g_variant_builder_init (&builder, type);
+              element_type = g_variant_type_element (type);
+
+              if (array_len == 0)
                 {
                   GVariant *item;
                   item = parse_value_from_blob (buf,
                                                 element_type,
-                                                FALSE,
+                                                TRUE,
                                                 indent + 2,
-                                                &local_error);
-                  if (item == NULL)
-                    {
-                      g_variant_builder_clear (&builder);
-                      goto fail;
-                    }
-                  g_variant_builder_add_value (&builder, item);
-                  g_variant_unref (item);
-                  offset = buf->pos;
+                                                NULL);
+                  g_assert (item == NULL);
                 }
-            }
+              else
+                {
+                  offset = buf->pos;
+                  target = offset + array_len;
+                  while (offset < target)
+                    {
+                      GVariant *item;
+                      item = parse_value_from_blob (buf,
+                                                    element_type,
+                                                    FALSE,
+                                                    indent + 2,
+                                                    &local_error);
+                      if (item == NULL)
+                        {
+                          g_variant_builder_clear (&builder);
+                          goto fail;
+                        }
+                      g_variant_builder_add_value (&builder, item);
+                      g_variant_unref (item);
+                      offset = buf->pos;
+                    }
+                }
 
-          ret = g_variant_builder_end (&builder);
+              ret = g_variant_builder_end (&builder);
+            }
         }
       break;
 
@@ -2374,81 +2395,91 @@ append_value_to_blob (GVariant             *value,
       break;
 
     case 'a': /* G_VARIANT_TYPE_ARRAY */
-      {
-        GVariant *item;
-        GVariantIter iter;
-        goffset array_len_offset;
-        goffset array_payload_begin_offset;
-        goffset cur_offset;
-        gsize array_len;
+      padding_added = ensure_output_padding (mbuf, 4);
+      if (value != NULL)
+        {
+          gsize n_children;
 
-        padding_added = ensure_output_padding (mbuf, 4);
-        if (value != NULL)
-          {
-            /* array length - will be filled in later */
-            array_len_offset = mbuf->valid_len;
-            g_memory_buffer_put_uint32 (mbuf, 0xF00DFACE);
+          n_children = g_variant_n_children (value);
 
-            /* From the D-Bus spec:
-             *
-             *   "A UINT32 giving the length of the array data in bytes,
-             *    followed by alignment padding to the alignment boundary of
-             *    the array element type, followed by each array element. The
-             *    array length is from the end of the alignment padding to
-             *    the end of the last element, i.e. it does not include the
-             *    padding after the length, or any padding after the last
-             *    element."
-             *
-             * Thus, we need to count how much padding the first element
-             * contributes and subtract that from the array length.
-             */
-            array_payload_begin_offset = mbuf->valid_len;
+          if (type_string[1] == 'y' && n_children > 0)
+            {
+              g_memory_buffer_put_uint32 (mbuf, n_children);
+              g_memory_buffer_write (mbuf, g_variant_get_data (value), n_children);
+            }
+          else
+            {
+              GVariant *item;
+              GVariantIter iter;
+              goffset array_len_offset;
+              goffset array_payload_begin_offset;
+              goffset cur_offset;
+              gsize array_len;
 
-            if (g_variant_n_children (value) == 0)
-              {
-                gsize padding_added_for_item;
-                if (!append_value_to_blob (NULL,
-                                           g_variant_type_element (type),
-                                           mbuf,
-                                           &padding_added_for_item,
-                                           error))
-                  goto fail;
-                array_payload_begin_offset += padding_added_for_item;
-              }
-            else
-              {
-                guint n;
-                n = 0;
-                g_variant_iter_init (&iter, value);
-                while ((item = g_variant_iter_next_value (&iter)) != NULL)
-                  {
-                    gsize padding_added_for_item;
-                    if (!append_value_to_blob (item,
-                                               g_variant_get_type (item),
-                                               mbuf,
-                                               &padding_added_for_item,
-                                               error))
-                      {
-                        g_variant_unref (item);
-                        goto fail;
-                      }
-                    g_variant_unref (item);
-                    if (n == 0)
-                      {
-                        array_payload_begin_offset += padding_added_for_item;
-                      }
-                    n++;
-                  }
-              }
+              /* array length - will be filled in later */
+              array_len_offset = mbuf->valid_len;
+              g_memory_buffer_put_uint32 (mbuf, 0xF00DFACE);
 
-            cur_offset = mbuf->valid_len;
-            array_len = cur_offset - array_payload_begin_offset;
-            mbuf->pos = array_len_offset;
+              /* From the D-Bus spec:
+               *
+               *   "A UINT32 giving the length of the array data in bytes,
+               *    followed by alignment padding to the alignment boundary of
+               *    the array element type, followed by each array element. The
+               *    array length is from the end of the alignment padding to
+               *    the end of the last element, i.e. it does not include the
+               *    padding after the length, or any padding after the last
+               *    element."
+               *
+               * Thus, we need to count how much padding the first element
+               * contributes and subtract that from the array length.
+               */
+              array_payload_begin_offset = mbuf->valid_len;
 
-            g_memory_buffer_put_uint32 (mbuf, array_len);
-            mbuf->pos = cur_offset;
-          }
-      }
+              if (n_children == 0)
+                {
+                  gsize padding_added_for_item;
+                  if (!append_value_to_blob (NULL,
+                                             g_variant_type_element (type),
+                                             mbuf,
+                                             &padding_added_for_item,
+                                             error))
+                    goto fail;
+                  array_payload_begin_offset += padding_added_for_item;
+                }
+              else
+                {
+                  guint n;
+                  n = 0;
+                  g_variant_iter_init (&iter, value);
+                  while ((item = g_variant_iter_next_value (&iter)) != NULL)
+                    {
+                      gsize padding_added_for_item;
+                      if (!append_value_to_blob (item,
+                                                 g_variant_get_type (item),
+                                                 mbuf,
+                                                 &padding_added_for_item,
+                                                 error))
+                        {
+                          g_variant_unref (item);
+                          goto fail;
+                        }
+                      g_variant_unref (item);
+                      if (n == 0)
+                        {
+                          array_payload_begin_offset += padding_added_for_item;
+                        }
+                      n++;
+                    }
+                }
+
+              cur_offset = mbuf->valid_len;
+              array_len = cur_offset - array_payload_begin_offset;
+              mbuf->pos = array_len_offset;
+
+              g_memory_buffer_put_uint32 (mbuf, array_len);
+              mbuf->pos = cur_offset;
+            }
+        }
       break;
 
     default:
