@@ -163,13 +163,6 @@ AC_MSG_RESULT([$glib_native_win32])
 AC_SUBST(LIB_EXE_MACHINE_FLAG)
 
 glib_have_carbon=no
-AC_MSG_CHECKING([for Mac OS X Carbon support])
-AC_TRY_CPP([
-#include <Carbon/Carbon.h>
-#include <CoreServices/CoreServices.h>
-], glib_have_carbon=yes)
-
-AC_MSG_RESULT([$glib_have_carbon])
 
 AC_MSG_CHECKING([for PS3 GameOS])
 case "$host" in
