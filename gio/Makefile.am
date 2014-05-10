@@ -2,7 +2,7 @@ include $(top_srcdir)/Makefile.decl
 
 NULL =
 
-SUBDIRS = gdbus-codegen
+SUBDIRS = gdbus-2.0/codegen
 
 if OS_UNIX
 SUBDIRS += libasyncns xdgmime
@@ -657,14 +657,16 @@ EXTRA_DIST += $(completion_SCRIPTS)
 # ------------------------------------------------------------------------
 # generate code here for the sake of gtk-doc
 
-gdbus-example-objectmanager-generated.h gdbus-example-objectmanager-generated.c : gdbus-example-objectmanager.xml
-	$(PYTHON) $(top_srcdir)/gio/gdbus-codegen/codegen_main.py	 	\
+gdbus-example-objectmanager-generated.h gdbus-example-objectmanager-generated.c : $(srcdir)/gdbus-example-objectmanager.xml $(srcdir)/gdbus-2.0/codegen/gdbus-codegen.in
+	$(AM_V_GEN) UNINSTALLED_GLIB_SRCDIR=$(top_srcdir) \
+		UNINSTALLED_GLIB_BUILDDIR=$(top_builddir) \
+		$(PYTHON) $(srcdir)/gdbus-2.0/codegen/gdbus-codegen.in	 	\
 		--interface-prefix org.gtk.GDBus.Example.ObjectManager.		\
 		--c-namespace Example 						\
 		--c-generate-object-manager					\
 		--generate-c-code gdbus-example-objectmanager-generated		\
 		--generate-docbook gdbus-example-objectmanager-generated	\
-		gdbus-example-objectmanager.xml					\
+		$(srcdir)/gdbus-example-objectmanager.xml					\
 		$(NULL)
 
 BUILT_SOURCES += gdbus-example-objectmanager-generated.h gdbus-example-objectmanager-generated.c

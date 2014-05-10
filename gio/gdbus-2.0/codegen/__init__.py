@@ -1,4 +1,4 @@
-#!/usr/bin/python
+# -*- Mode: Python -*-
 
 # GDBus - GLib D-Bus Library
 #
@@ -15,19 +15,13 @@
 # Lesser General Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General
-# Public License along with this library; if not, write to the
-# Free Software Foundation, Inc., 59 Temple Place, Suite 330,
-# Boston, MA 02111-1307, USA.
+# Public License along with this library; if not, see <http://www.gnu.org/licenses/>.
 #
 # Author: David Zeuthen <davidz@redhat.com>
 
-
 import os
-import sys
 
-path = os.path.join('@libdir@', 'gdbus-codegen')
-sys.path.insert(0, path)
+builddir = os.environ.get('UNINSTALLED_GLIB_BUILDDIR')
 
-from codegen_main import codegen_main
-
-sys.exit(codegen_main())
+if builddir is not None:
+    __path__.append(os.path.abspath(os.path.join(builddir, 'gio', 'gdbus-2.0', 'codegen')))
