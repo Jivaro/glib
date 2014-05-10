@@ -32,6 +32,7 @@ glib-gettextize
 glib-zip
 gtk-doc.make
 py-compile
+test-driver
 
 INSTALL
 README
