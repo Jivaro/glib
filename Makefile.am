@@ -12,11 +12,8 @@ else
 MAYBE_PROXYLIBINTL = po
 endif
 
-if ENABLE_TESTS
-MAYBE_TESTS = tests
-else
+
 MAYBE_TESTS =
-endif
 
 SUBDIRS = . $(MAYBE_PROXYLIBINTL) m4macros glib gmodule gthread gobject gio docs $(MAYBE_TESTS)
 DIST_SUBDIRS = $(SUBDIRS) build

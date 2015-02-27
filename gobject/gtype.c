@@ -4320,6 +4320,9 @@ _g_type_boxed_init (GType          type,
   node->data->boxed.free_func = free_func;
 }
 
+// declaration so we can call it in init functions below
+static void gobject_init_ctor (void);
+
 /* --- initialization --- */
 /**
  * g_type_init_with_debug_flags:
@@ -4338,7 +4341,8 @@ _g_type_boxed_init (GType          type,
 void
 g_type_init_with_debug_flags (GTypeDebugFlags debug_flags)
 {
-  g_assert_type_system_initialized ();
+  //g_assert_type_system_initialized ();
+  gobject_init_ctor();
 
   if (debug_flags)
     g_message ("g_type_init_with_debug_flags() is no longer supported.  Use the GOBJECT_DEBUG environment variable.");
@@ -4356,7 +4360,8 @@ g_type_init_with_debug_flags (GTypeDebugFlags debug_flags)
 void
 g_type_init (void)
 {
-  g_assert_type_system_initialized ();
+  //g_assert_type_system_initialized ();
+  gobject_init_ctor();
 }
 
 #if defined (G_HAS_CONSTRUCTORS)
